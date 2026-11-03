@@ -29,17 +29,25 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Setup local.properties
+        run: |
+          echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
+
       - name: Get Dependencies
         run: flutter pub get
 
       - name: Build Android APK
         run: flutter build apk --release
 
+      - name: Rename APK
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk NuroPlay.apk
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: NuroPlay-APK
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: NuroPlay.apk
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
@@ -52,10 +60,12 @@ jobs:
             ## 🎮 NuroPlay - Think Fast, Play Smart
             
             ### 📥 Download Android APK
-            Click **`app-release.apk`** below to download and install on any Android phone!
+            Download **`NuroPlay.apk`** below to install and play on any Android device!
             
             ### ✨ Features Included:
             - **Real-World Arcade Suite**: Paper Football, Jenga Tower, Cup Pong, Mini Carrom, Marble Knockout, Tic-Tac-Toe, Rock Paper Scissors, Four in a Row, Reflex Duel, and Paper Plane.
             - **👥 Multiplayer Options**: 2-Player Pass & Play, face-to-face split screen duels, and vs smart AI bots.
             - **Brain & Speed Math Challenges**: Speed calculation duels, memory matrix, pattern recall, and sliding puzzles.
-          files: build/app/outputs/flutter-apk/app-release.apk
+          files: |
+            NuroPlay.apk
+            build/app/outputs/flutter-apk/app-release.apk
