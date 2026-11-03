@@ -35,6 +35,7 @@ class _PaperFootballGameState extends State<PaperFootballGame> with SingleTicker
   int _round = 1;
   static const int _maxRounds = 5;
   bool _isPlayerTurn = true;
+  bool _isTwoPlayer = false;
   _FootballPhase _phase = _FootballPhase.sliding;
   String _statusMessage = 'Flick the paper triangle toward the table edge!';
 
@@ -60,11 +61,11 @@ class _PaperFootballGameState extends State<PaperFootballGame> with SingleTicker
       _dragCurrent = null;
       _phase = _FootballPhase.sliding;
       _statusMessage = _isPlayerTurn
-          ? 'Your turn! Flick gently to stop near the top edge.'
-          : 'AI is taking their flick...';
+          ? (_isTwoPlayer ? 'Player 1 Turn! Flick toward top edge.' : 'Your turn! Flick gently to stop near the top edge.')
+          : (_isTwoPlayer ? 'Player 2 Turn! Flick toward bottom edge.' : 'AI is taking their flick...');
     });
 
-    if (!_isPlayerTurn) {
+    if (!_isPlayerTurn && !_isTwoPlayer) {
       _executeAiTurn();
     }
   }
@@ -113,32 +114,32 @@ class _PaperFootballGameState extends State<PaperFootballGame> with SingleTicker
     if (_phase != _FootballPhase.sliding) return;
 
     if (_isPlayerTurn) {
-      // Player target is top edge (y near 0)
+      // Player 1 target is top edge (y near 0)
       if (_ballPos.dy < 0) {
         // Flew off edge
-        _statusMessage = 'Flew off the table! Turnover! ❌';
+        _statusMessage = '${_isTwoPlayer ? "Player 1" : "You"} flew off the table! Turnover! ❌';
         _endTurn(false, 0);
       } else if (_ballPos.dy <= 45) {
         // Touchdown! Hanging over the edge!
-        _statusMessage = 'TOUCHDOWN! +6 POINTS! 🎉 Kick field goal!';
+        _statusMessage = 'TOUCHDOWN! ${_isTwoPlayer ? "Player 1" : "You"} +6 POINTS! 🎉 Kick field goal!';
         _playerScore += 6;
         _phase = _FootballPhase.fieldGoal;
         _ballPos = const Offset(tableWidth / 2, 440);
       } else {
-        _statusMessage = 'Short of the edge! No touchdown.';
+        _statusMessage = '${_isTwoPlayer ? "Player 1" : "You"} came up short of the edge.';
         _endTurn(false, 0);
       }
     } else {
-      // AI target is bottom edge (y near height)
+      // Opponent / Player 2 target is bottom edge (y near height)
       if (_ballPos.dy > height) {
-        _statusMessage = 'AI flew off the edge! Your turn.';
+        _statusMessage = '${_isTwoPlayer ? "Player 2" : "AI"} flew off the edge! ${_isTwoPlayer ? "Player 1" : "Your"} turn.';
         _endTurn(true, 0);
       } else if (_ballPos.dy >= height - 45) {
-        _statusMessage = 'AI scored a Touchdown! +6 points.';
+        _statusMessage = 'TOUCHDOWN! ${_isTwoPlayer ? "Player 2" : "AI"} +6 points! 🎉';
         _opponentScore += 6;
         _endTurn(true, 0);
       } else {
-        _statusMessage = 'AI came up short.';
+        _statusMessage = '${_isTwoPlayer ? "Player 2" : "AI"} came up short.';
         _endTurn(true, 0);
       }
     }
@@ -160,7 +161,8 @@ class _PaperFootballGameState extends State<PaperFootballGame> with SingleTicker
   }
 
   void _onPanStart(DragStartDetails details) {
-    if (_isMoving || !_isPlayerTurn || _phase == _FootballPhase.roundOver) return;
+    if (_isMoving || _phase == _FootballPhase.roundOver) return;
+    if (!_isTwoPlayer && !_isPlayerTurn) return;
     _dragStart = details.localPosition;
     _dragCurrent = details.localPosition;
   }
@@ -226,7 +228,90 @@ class _PaperFootballGameState extends State<PaperFootballGame> with SingleTicker
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                     Expanded(
-                      child: Text('Paper Football Tabletop', style: AppTypography.heading3, textAlign: TextAlign.center),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Paper Football', style: AppTypography.heading3.copyWith(fontSize: 16)),
+                          Text(
+                            _isTwoPlayer ? '2-Player Pass & Play' : 'vs AI Opponent',
+                            style: AppTypography.captionSmall.copyWith(
+                              color: _isTwoPlayer ? AppColors.secondaryAccent : AppColors.primaryAccent,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Mode Toggle
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.cardBg,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.divider),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              if (_isTwoPlayer) {
+                                setState(() {
+                                  _isTwoPlayer = false;
+                                  _playerScore = 0;
+                                  _opponentScore = 0;
+                                  _round = 1;
+                                  _isPlayerTurn = true;
+                                });
+                                _resetBall();
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: !_isTwoPlayer ? AppColors.primaryAccent : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'AI',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: !_isTwoPlayer ? Colors.white : AppColors.secondaryText,
+                                ),
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              if (!_isTwoPlayer) {
+                                setState(() {
+                                  _isTwoPlayer = true;
+                                  _playerScore = 0;
+                                  _opponentScore = 0;
+                                  _round = 1;
+                                  _isPlayerTurn = true;
+                                });
+                                _resetBall();
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: _isTwoPlayer ? AppColors.secondaryAccent : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                '2P',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: _isTwoPlayer ? Colors.white : AppColors.secondaryText,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.replay_rounded, color: AppColors.primaryAccent),
@@ -249,7 +334,7 @@ class _PaperFootballGameState extends State<PaperFootballGame> with SingleTicker
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildScorePill('You', _playerScore, AppColors.primaryAccent),
+                    _buildScorePill(_isTwoPlayer ? 'Player 1' : 'You', _playerScore, AppColors.primaryAccent),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
@@ -259,7 +344,7 @@ class _PaperFootballGameState extends State<PaperFootballGame> with SingleTicker
                       ),
                       child: Text('Round $_round/$_maxRounds', style: AppTypography.labelSmall),
                     ),
-                    _buildScorePill('AI Opponent', _opponentScore, AppColors.secondaryAccent),
+                    _buildScorePill(_isTwoPlayer ? 'Player 2' : 'AI Opponent', _opponentScore, AppColors.secondaryAccent),
                   ],
                 ),
 

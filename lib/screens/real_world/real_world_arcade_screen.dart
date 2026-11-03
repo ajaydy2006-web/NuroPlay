@@ -15,6 +15,9 @@ class RealWorldGameInfo {
   final String route;
   final Color accentColor;
   final String rules;
+  final bool hasMultiplayer;
+  final String multiplayerMode;
+  final String multiplayerDetails;
 
   const RealWorldGameInfo({
     required this.id,
@@ -27,6 +30,9 @@ class RealWorldGameInfo {
     required this.route,
     required this.accentColor,
     required this.rules,
+    this.hasMultiplayer = true,
+    this.multiplayerMode = '2-Player Duel',
+    this.multiplayerDetails = 'Pass & Play on this device with a friend',
   });
 }
 
@@ -53,6 +59,9 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       route: '/game-paper-football',
       accentColor: Color(0xFF00D2FF),
       rules: '• Slide the paper triangle across the table so it hangs over the opposite edge without falling off for a Touchdown (6 pts)!\n• Complete the extra point / field goal by flicking through the goal posts!',
+      hasMultiplayer: true,
+      multiplayerMode: '2P Pass & Play',
+      multiplayerDetails: 'Two players take turns flicking from opposite table edges',
     ),
     RealWorldGameInfo(
       id: 'paper_plane',
@@ -65,6 +74,9 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       route: '/game-paper-plane',
       accentColor: Color(0xFF0091FF),
       rules: '• Choose Dart (speed), Glider (lift), or Acrobat (balanced).\n• Drag back to charge launch thrust and set pitch angle.\n• Ride tailwinds, avoid headwinds, and fly through glowing rings for bonus multipliers!',
+      hasMultiplayer: true,
+      multiplayerMode: '2P Flight Contest',
+      multiplayerDetails: 'Alternate throws to see whose plane glides the furthest',
     ),
     RealWorldGameInfo(
       id: 'mini_carrom',
@@ -77,6 +89,9 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       route: '/game-mini-carrom',
       accentColor: Color(0xFF00E5FF),
       rules: '• Position striker along the baseline with the horizontal slider.\n• Drag back from the striker to aim and charge shot power.\n• Pocket white (10pts), black (5pts), and the Queen (25pts) with a subsequent cover!',
+      hasMultiplayer: true,
+      multiplayerMode: '2P Pass & Play',
+      multiplayerDetails: 'Player 1 (White) vs Player 2 (Black) alternate shots',
     ),
     RealWorldGameInfo(
       id: 'cup_pong',
@@ -89,6 +104,9 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       route: '/game-cup-pong',
       accentColor: Color(0xFFFF2A6D),
       rules: '• Drag back or flick forward from the bottom of the screen to throw.\n• Land inside red cups to eliminate them from the table.\n• Clear all 6 cups with remaining balls to set high scores!',
+      hasMultiplayer: true,
+      multiplayerMode: '2P Cup Duel',
+      multiplayerDetails: 'Head-to-head toss competition: sink more cups in 5 throws',
     ),
     RealWorldGameInfo(
       id: 'marble_knockout',
@@ -101,6 +119,9 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       route: '/game-marble-knockout',
       accentColor: Color(0xFF0091FF),
       rules: '• Aim and release your shooter marble into the ring.\n• Transfer momentum upon collision to knock colored target marbles over the boundary line.\n• Keep your shooter inside the ring to retain your turn!',
+      hasMultiplayer: true,
+      multiplayerMode: '2P Ring Battle',
+      multiplayerDetails: 'Alternate turns blasting marbles out of the circle',
     ),
     RealWorldGameInfo(
       id: 'jenga_tower',
@@ -113,6 +134,9 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       route: '/game-jenga',
       accentColor: Color(0xFFFFB800),
       rules: '• Tap any wooden block on floors below the top 2.\n• Drag the extraction slider steadily—removing key corner blocks increases tower sway and instability!\n• Successfully extracted blocks are stacked on top.\n• The player who topples the tower loses!',
+      hasMultiplayer: true,
+      multiplayerMode: '2P Pass & Play',
+      multiplayerDetails: 'Take turns pulling blocks until someone topples the tower',
     ),
     RealWorldGameInfo(
       id: 'tic_tac_toe',
@@ -125,6 +149,9 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       route: '/game-tictactoe',
       accentColor: Color(0xFF0091FF),
       rules: '• Align 3 of your marks horizontally, vertically, or diagonally.\n• Test your strategies against Smart Minimax AI or battle a friend locally in 2P mode!',
+      hasMultiplayer: true,
+      multiplayerMode: '2P Pass & Play',
+      multiplayerDetails: 'Turn-based X vs O duel on the same screen',
     ),
     RealWorldGameInfo(
       id: 'rps_showdown',
@@ -137,6 +164,9 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       route: '/game-rps',
       accentColor: Color(0xFFFF2A6D),
       rules: '• Rock crushes Scissors, Scissors cuts Paper, Paper covers Rock.\n• The AI tracks your recent tendencies and adjusts its predictions in Best-of series!',
+      hasMultiplayer: true,
+      multiplayerMode: '2P Secret Duel',
+      multiplayerDetails: 'Secret selection showdown with animated card reveal',
     ),
     RealWorldGameInfo(
       id: 'four_in_row',
@@ -149,6 +179,9 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       route: '/game-four-in-row',
       accentColor: Color(0xFF00D2FF),
       rules: '• Tap any of the 7 columns to drop your color disc into the lowest available slot.\n• Connect 4 discs in a row in any direction to win.\n• Block your opponent before they set up unblockable dual-threat lines!',
+      hasMultiplayer: true,
+      multiplayerMode: '2P Pass & Play',
+      multiplayerDetails: 'Player 1 (Cyan) vs Player 2 (Purple) alternate drops',
     ),
     RealWorldGameInfo(
       id: 'reflex_duel',
@@ -161,13 +194,20 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       route: '/game-reflex-duel',
       accentColor: Color(0xFF00F5A0),
       rules: '• Hold device flat between two players (or play against ReflexBot).\n• Wait through the red anticipation phase.\n• The INSTANT the screen flashes GREEN, tap your button!\n• Beware: false starts award a point to your opponent!',
+      hasMultiplayer: true,
+      multiplayerMode: 'Face-to-Face 2P',
+      multiplayerDetails: 'Inverted split-screen instant millisecond reflex battle',
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
     final filteredGames = _games.where((g) {
-      final matchesCategory = _selectedCategory == 'all' || g.category == _selectedCategory;
+      final matchesCategory = _selectedCategory == 'all'
+          ? true
+          : _selectedCategory == 'multiplayer'
+              ? g.hasMultiplayer
+              : g.category == _selectedCategory;
       final matchesQuery = _searchQuery.isEmpty ||
           g.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           g.subtitle.toLowerCase().contains(_searchQuery.toLowerCase()) ||
@@ -329,6 +369,8 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                   children: [
                     _buildCategoryChip('all', 'All Games (10)', Icons.apps_rounded),
                     const SizedBox(width: 8),
+                    _buildCategoryChip('multiplayer', '👥 2P Multiplayer', Icons.people_alt_rounded),
+                    const SizedBox(width: 8),
                     _buildCategoryChip('classroom', '🏫 Classroom', Icons.school_rounded),
                     const SizedBox(width: 8),
                     _buildCategoryChip('tabletop', '🎯 Tabletop', Icons.table_restaurant_rounded),
@@ -432,13 +474,13 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
         borderRadius: BorderRadius.circular(18),
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
-          onTap: () => Navigator.pushNamed(context, game.route),
+          onTap: () => _showGameOptionsModal(game),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top row: Icon, Title, and Info Icon
+                // Top row: Icon, Title, Category & Badges, and Info Icon
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -499,12 +541,42 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                             ],
                           ),
                           const SizedBox(height: 4),
-                          Text(
-                            game.categoryName,
-                            style: AppTypography.captionSmall.copyWith(
-                              color: game.accentColor,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Row(
+                            children: [
+                              Text(
+                                game.categoryName,
+                                style: AppTypography.captionSmall.copyWith(
+                                  color: game.accentColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (game.hasMultiplayer) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.secondaryAccent.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: AppColors.secondaryAccent.withOpacity(0.4)),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.people_alt_rounded, size: 11, color: AppColors.secondaryAccent),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        game.multiplayerMode,
+                                        style: const TextStyle(
+                                          color: AppColors.secondaryAccent,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ],
                       ),
@@ -521,67 +593,353 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                   style: AppTypography.bodySmall.copyWith(color: AppColors.secondaryText, height: 1.4),
                 ),
                 const SizedBox(height: 12),
-                // Tags and Play Button
+                // Tags
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: game.tags.map((tag) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryBg,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: AppColors.divider),
+                      ),
+                      child: Text(
+                        tag,
+                        style: const TextStyle(
+                          color: AppColors.primaryText,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 14),
+                // Game Mode Action Buttons
                 Row(
                   children: [
+                    // Solo / Options Button
                     Expanded(
-                      child: Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
-                        children: game.tags.map((tag) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryBg,
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: AppColors.divider),
-                            ),
-                            child: Text(
-                              tag,
-                              style: const TextStyle(
-                                color: AppColors.primaryText,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          side: BorderSide(color: AppColors.primaryAccent.withOpacity(0.6)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          backgroundColor: AppColors.primaryAccent.withOpacity(0.08),
+                        ),
+                        onPressed: () => _showGameOptionsModal(game),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.tune_rounded, size: 16, color: AppColors.primaryAccent),
+                            SizedBox(width: 6),
+                            Text(
+                              'Game Options',
+                              style: TextStyle(
+                                color: AppColors.primaryAccent,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
                               ),
                             ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [game.accentColor, game.accentColor.withOpacity(0.8)],
+                          ],
                         ),
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: game.accentColor.withOpacity(0.35),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Play',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                            ),
-                          ),
-                          SizedBox(width: 4),
-                          Icon(Icons.play_arrow_rounded, color: Colors.white, size: 18),
-                        ],
                       ),
                     ),
+                    const SizedBox(width: 10),
+                    // Quick 2P Multiplayer Launch Button
+                    if (game.hasMultiplayer)
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            backgroundColor: AppColors.secondaryAccent,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            elevation: 3,
+                          ),
+                          onPressed: () => Navigator.pushNamed(context, game.route),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.people_alt_rounded, size: 16, color: Colors.white),
+                              SizedBox(width: 6),
+                              Text(
+                                '👥 2P Duel',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            backgroundColor: game.accentColor,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                          onPressed: () => Navigator.pushNamed(context, game.route),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Play Solo',
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                              ),
+                              SizedBox(width: 4),
+                              Icon(Icons.play_arrow_rounded, color: Colors.white, size: 16),
+                            ],
+                          ),
+                        ),
+                      ),
                   ],
                 ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showGameOptionsModal(RealWorldGameInfo game) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.cardBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Drag Handle Bar
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: AppColors.divider,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  // Header
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: game.accentColor.withOpacity(0.18),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: game.accentColor.withOpacity(0.4)),
+                        ),
+                        child: Icon(game.icon, color: game.accentColor, size: 28),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(game.title, style: AppTypography.heading3.copyWith(fontSize: 19)),
+                            const SizedBox(height: 2),
+                            Text(
+                              game.subtitle,
+                              style: AppTypography.captionSmall.copyWith(color: AppColors.secondaryText),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'SELECT GAME MODE',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: AppColors.secondaryText,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Option 1: Solo vs AI
+                  _buildOptionTile(
+                    title: 'Solo Practice / vs AI',
+                    subtitle: 'Play against smart bot algorithms or practice physics aiming',
+                    icon: Icons.smart_toy_rounded,
+                    accent: game.accentColor,
+                    badge: 'SOLO / AI',
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      Navigator.pushNamed(context, game.route);
+                    },
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Option 2: 2-Player Local Multiplayer
+                  if (game.hasMultiplayer)
+                    _buildOptionTile(
+                      title: '2-Player Multiplayer (${game.multiplayerMode})',
+                      subtitle: game.multiplayerDetails,
+                      icon: Icons.people_alt_rounded,
+                      accent: AppColors.secondaryAccent,
+                      badge: 'LOCAL 2P',
+                      isHighlighted: true,
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        Navigator.pushNamed(context, game.route);
+                      },
+                    ),
+                  if (game.hasMultiplayer) const SizedBox(height: 10),
+
+                  // Option 3: Online 1v1 Room
+                  _buildOptionTile(
+                    title: 'Online 1v1 Room (Room Code)',
+                    subtitle: 'Create a private multiplayer room or join with a 4-digit PIN',
+                    icon: Icons.wifi_tethering_rounded,
+                    accent: const Color(0xFF00F5A0),
+                    badge: 'ONLINE 1v1',
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      Navigator.pushNamed(context, '/room-duel');
+                    },
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Rules & How to Play Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: const BorderSide(color: AppColors.divider),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        _showGameRules(game);
+                      },
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.menu_book_rounded, size: 16, color: AppColors.primaryText),
+                          SizedBox(width: 8),
+                          Text(
+                            'View Rules & How to Play',
+                            style: TextStyle(color: AppColors.primaryText, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildOptionTile({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color accent,
+    required String badge,
+    required VoidCallback onTap,
+    bool isHighlighted = false,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isHighlighted ? accent.withOpacity(0.12) : AppColors.primaryBg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isHighlighted ? accent.withOpacity(0.5) : AppColors.divider,
+          width: isHighlighted ? 1.5 : 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: accent.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: accent, size: 22),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: isHighlighted ? FontWeight.bold : FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: accent.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              badge,
+                              style: TextStyle(
+                                color: accent,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          color: AppColors.secondaryText,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.arrow_forward_ios_rounded, color: AppColors.secondaryText, size: 14),
               ],
             ),
           ),

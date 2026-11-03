@@ -40,6 +40,10 @@ class _CupPongGameState extends State<CupPongGame> with SingleTickerProviderStat
 
   int _ballsRemaining = 10;
   int _score = 0;
+  bool _isTwoPlayer = false;
+  int _currentPlayer = 1;
+  int _player1Score = 0;
+  int _player2Score = 0;
   String _status = 'Swipe up or drag back to throw the ping pong ball!';
 
   late List<_PongCup> _cups;
@@ -55,10 +59,6 @@ class _CupPongGameState extends State<CupPongGame> with SingleTickerProviderStat
   }
 
   void _setupCups() {
-    // 6 cups arranged in a centered triangle pyramid:
-    // Row 1 (top): 3 cups
-    // Row 2: 2 cups
-    // Row 3: 1 cup
     _cups = [
       _PongCup(id: 1, pos: const Offset(_vWidth / 2 - 46, 110)),
       _PongCup(id: 2, pos: const Offset(_vWidth / 2, 110)),
@@ -69,8 +69,31 @@ class _CupPongGameState extends State<CupPongGame> with SingleTickerProviderStat
     ];
 
     _resetBall();
-    _ballsRemaining = 10;
+    _ballsRemaining = _isTwoPlayer ? 6 : 10;
     _score = 0;
+    _currentPlayer = 1;
+    _player1Score = 0;
+    _player2Score = 0;
+    _status = _isTwoPlayer
+        ? 'Player 1 Turn! Sink cups with 6 balls!'
+        : 'Swipe up or drag back to throw the ping pong ball!';
+  }
+
+  void _setupCupsForPlayer2() {
+    setState(() {
+      _cups = [
+        _PongCup(id: 1, pos: const Offset(_vWidth / 2 - 46, 110)),
+        _PongCup(id: 2, pos: const Offset(_vWidth / 2, 110)),
+        _PongCup(id: 3, pos: const Offset(_vWidth / 2 + 46, 110)),
+        _PongCup(id: 4, pos: const Offset(_vWidth / 2 - 23, 150)),
+        _PongCup(id: 5, pos: const Offset(_vWidth / 2 + 23, 150)),
+        _PongCup(id: 6, pos: const Offset(_vWidth / 2, 190)),
+      ];
+      _ballsRemaining = 6;
+      _score = 0;
+      _resetBall();
+      _status = 'Player 2 Turn! Sink cups to beat $_player1Score pts!';
+    });
   }
 
   void _resetBall() {
@@ -128,11 +151,33 @@ class _CupPongGameState extends State<CupPongGame> with SingleTickerProviderStat
     Future.delayed(const Duration(milliseconds: 900), () {
       if (!mounted) return;
       if (_cups.every((c) => c.isCleared) || _ballsRemaining <= 0) {
-        StorageService.setPersonalBest('cup_pong', _score);
-        _status = _cups.every((c) => c.isCleared)
-            ? '🏆 ALL CUPS CLEARED! PERFECT GAME!'
-            : 'Out of balls! Final Score: $_score';
-        setState(() {});
+        if (_isTwoPlayer) {
+          if (_currentPlayer == 1) {
+            _player1Score = _score;
+            _currentPlayer = 2;
+            _status = 'Player 1 finished: $_player1Score pts! Pass to Player 2!';
+            setState(() {});
+            Future.delayed(const Duration(milliseconds: 1800), () {
+              if (!mounted) return;
+              _setupCupsForPlayer2();
+            });
+          } else {
+            _player2Score = _score;
+            final winnerText = _player1Score > _player2Score
+                ? '🏆 PLAYER 1 WINS THE DUEL! ($_player1Score vs $_player2Score)'
+                : _player2Score > _player1Score
+                    ? '🏆 PLAYER 2 WINS THE DUEL! ($_player2Score vs $_player1Score)'
+                    : '🤝 IT\'S A TIE! ($_player1Score pts each)';
+            _status = winnerText;
+            setState(() {});
+          }
+        } else {
+          StorageService.setPersonalBest('cup_pong', _score);
+          _status = _cups.every((c) => c.isCleared)
+              ? '🏆 ALL CUPS CLEARED! PERFECT GAME!'
+              : 'Out of balls! Final Score: $_score';
+          setState(() {});
+        }
       } else {
         _resetBall();
       }
@@ -192,10 +237,81 @@ class _CupPongGameState extends State<CupPongGame> with SingleTickerProviderStat
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                     Expanded(
-                      child: Text(
-                        'Cup Pong Tabletop',
-                        style: AppTypography.heading3,
-                        textAlign: TextAlign.center,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Cup Pong', style: AppTypography.heading3.copyWith(fontSize: 16)),
+                          Text(
+                            _isTwoPlayer ? '2P Cup Duel: Player $_currentPlayer' : 'Solo Target Arc',
+                            style: AppTypography.captionSmall.copyWith(
+                              color: _isTwoPlayer ? AppColors.secondaryAccent : AppColors.primaryAccent,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Mode Toggle (Solo / 2P)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.cardBg,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.divider),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              if (_isTwoPlayer) {
+                                setState(() {
+                                  _isTwoPlayer = false;
+                                  _setupCups();
+                                });
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: !_isTwoPlayer ? AppColors.primaryAccent : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'Solo',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: !_isTwoPlayer ? Colors.white : AppColors.secondaryText,
+                                ),
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              if (!_isTwoPlayer) {
+                                setState(() {
+                                  _isTwoPlayer = true;
+                                  _setupCups();
+                                });
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: _isTwoPlayer ? AppColors.secondaryAccent : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                '2P',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: _isTwoPlayer ? Colors.white : AppColors.secondaryText,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     IconButton(
@@ -219,8 +335,10 @@ class _CupPongGameState extends State<CupPongGame> with SingleTickerProviderStat
                         border: Border.all(color: AppColors.divider),
                       ),
                       child: Text(
-                        'Score: $_score pts',
-                        style: AppTypography.monoMedium.copyWith(color: AppColors.primaryAccent, fontSize: 15),
+                        _isTwoPlayer
+                            ? 'P1: $_player1Score  •  P2: ${_currentPlayer == 2 ? _score : _player2Score}'
+                            : 'Score: $_score pts',
+                        style: AppTypography.monoMedium.copyWith(color: AppColors.primaryAccent, fontSize: 13),
                       ),
                     ),
                     Container(

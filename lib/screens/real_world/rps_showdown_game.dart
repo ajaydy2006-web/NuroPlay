@@ -21,8 +21,10 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
   int _aiScore = 0;
   int _draws = 0;
   int _streak = 0;
+  bool _isTwoPlayer = false;
 
   _RpsChoice? _playerChoice;
+  _RpsChoice? _p2SecretChoice;
   _RpsChoice? _aiChoice;
   String _outcomeText = 'Select your move to throw!';
   _RpsPhase _phase = _RpsPhase.choose;
@@ -33,6 +35,33 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
 
   void _onPlayerSelected(_RpsChoice choice) {
     if (_phase != _RpsPhase.choose) return;
+
+    if (_isTwoPlayer) {
+      if (_playerChoice == null) {
+        // Player 1 picked, wait for Player 2
+        setState(() {
+          _playerChoice = choice;
+          _outcomeText = 'Player 1 locked in! 🔒 Pass to Player 2.';
+        });
+      } else {
+        // Player 2 picked!
+        _p2SecretChoice = choice;
+        setState(() {
+          _phase = _RpsPhase.countdown;
+          _countdownValue = 3;
+        });
+
+        Timer.periodic(const Duration(milliseconds: 300), (timer) {
+          if (_countdownValue > 1) {
+            setState(() => _countdownValue--);
+          } else {
+            timer.cancel();
+            _evaluateTwoPlayerRound();
+          }
+        });
+      }
+      return;
+    }
 
     setState(() {
       _playerChoice = choice;
@@ -50,6 +79,51 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
         _evaluateRound(choice);
       }
     });
+  }
+
+  void _evaluateTwoPlayerRound() {
+    final p1 = _playerChoice!;
+    final p2 = _p2SecretChoice!;
+
+    String result;
+    if (p1 == p2) {
+      result = 'Draw!';
+      _draws++;
+    } else if ((p1 == _RpsChoice.rock && p2 == _RpsChoice.scissors) ||
+        (p1 == _RpsChoice.paper && p2 == _RpsChoice.rock) ||
+        (p1 == _RpsChoice.scissors && p2 == _RpsChoice.paper)) {
+      result = 'Player 1 Wins Round! 🎉';
+      _playerScore++;
+    } else {
+      result = 'Player 2 Wins Round! ⚡';
+      _aiScore++;
+    }
+
+    setState(() {
+      _aiChoice = p2;
+      _outcomeText = result;
+      _phase = _RpsPhase.reveal;
+    });
+
+    if (_playerScore >= _targetWins || _aiScore >= _targetWins) {
+      Future.delayed(const Duration(milliseconds: 1400), () {
+        if (!mounted) return;
+        setState(() {
+          _phase = _RpsPhase.matchOver;
+        });
+      });
+    } else {
+      Future.delayed(const Duration(milliseconds: 1800), () {
+        if (!mounted) return;
+        setState(() {
+          _phase = _RpsPhase.choose;
+          _playerChoice = null;
+          _p2SecretChoice = null;
+          _aiChoice = null;
+          _outcomeText = 'Player 1: Select your move!';
+        });
+      });
+    }
   }
 
   void _evaluateRound(_RpsChoice pChoice) {
@@ -139,9 +213,10 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
       _draws = 0;
       _streak = 0;
       _playerChoice = null;
+      _p2SecretChoice = null;
       _aiChoice = null;
       _phase = _RpsPhase.choose;
-      _outcomeText = 'Select your move to throw!';
+      _outcomeText = _isTwoPlayer ? 'Player 1: Select your move!' : 'Select your move to throw!';
     });
   }
 
@@ -164,7 +239,82 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                     Expanded(
-                      child: Text('Rock Paper Scissors', style: AppTypography.heading3, textAlign: TextAlign.center),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Rock Paper Scissors', style: AppTypography.heading3.copyWith(fontSize: 16)),
+                          Text(
+                            _isTwoPlayer ? '2P Secret Pass & Play' : 'vs AI Opponent',
+                            style: AppTypography.captionSmall.copyWith(
+                              color: _isTwoPlayer ? AppColors.secondaryAccent : AppColors.primaryAccent,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Mode Toggle (AI / 2P)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.cardBg,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.divider),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              if (_isTwoPlayer) {
+                                setState(() {
+                                  _isTwoPlayer = false;
+                                  _resetMatch();
+                                });
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: !_isTwoPlayer ? AppColors.primaryAccent : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'AI',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: !_isTwoPlayer ? Colors.white : AppColors.secondaryText,
+                                ),
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              if (!_isTwoPlayer) {
+                                setState(() {
+                                  _isTwoPlayer = true;
+                                  _resetMatch();
+                                });
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: _isTwoPlayer ? AppColors.secondaryAccent : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                '2P',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: _isTwoPlayer ? Colors.white : AppColors.secondaryText,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.replay_rounded, color: AppColors.primaryAccent),
@@ -211,7 +361,7 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildScorePill('You', _playerScore, AppColors.primaryAccent),
+                    _buildScorePill(_isTwoPlayer ? 'Player 1' : 'You', _playerScore, AppColors.primaryAccent),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
@@ -220,7 +370,7 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
                       ),
                       child: Text('Draws: $_draws', style: AppTypography.bodySmall),
                     ),
-                    _buildScorePill('AI Bot', _aiScore, AppColors.secondaryAccent),
+                    _buildScorePill(_isTwoPlayer ? 'Player 2' : 'AI Bot', _aiScore, AppColors.secondaryAccent),
                   ],
                 ),
 
@@ -274,17 +424,25 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                                 children: [
-                                  // Player Choice
+                                  // Player 1 Choice
                                   Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        _playerChoice != null ? _getEmoji(_playerChoice!) : '❓',
+                                        _phase == _RpsPhase.choose && _isTwoPlayer && _playerChoice != null
+                                            ? '🔒'
+                                            : _playerChoice != null
+                                                ? _getEmoji(_playerChoice!)
+                                                : '❓',
                                         style: const TextStyle(fontSize: 56),
                                       ),
                                       const SizedBox(height: 6),
                                       Text(
-                                        _playerChoice != null ? _getLabel(_playerChoice!) : 'You',
+                                        _phase == _RpsPhase.choose && _isTwoPlayer && _playerChoice != null
+                                            ? 'Locked In'
+                                            : _playerChoice != null
+                                                ? _getLabel(_playerChoice!)
+                                                : (_isTwoPlayer ? 'Player 1' : 'You'),
                                         style: AppTypography.labelMedium.copyWith(color: AppColors.primaryAccent),
                                       ),
                                     ],
@@ -292,17 +450,19 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
 
                                   Text('VS', style: AppTypography.heading3.copyWith(color: AppColors.secondaryText)),
 
-                                  // AI Choice
+                                  // Player 2 / AI Choice
                                   Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        _aiChoice != null ? _getEmoji(_aiChoice!) : '🤖',
+                                        _aiChoice != null ? _getEmoji(_aiChoice!) : (_isTwoPlayer ? '👥' : '🤖'),
                                         style: const TextStyle(fontSize: 56),
                                       ),
                                       const SizedBox(height: 6),
                                       Text(
-                                        _aiChoice != null ? _getLabel(_aiChoice!) : 'AI Bot',
+                                        _aiChoice != null
+                                            ? _getLabel(_aiChoice!)
+                                            : (_isTwoPlayer ? 'Player 2' : 'AI Bot'),
                                         style: AppTypography.labelMedium.copyWith(color: AppColors.secondaryAccent),
                                       ),
                                     ],
