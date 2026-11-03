@@ -299,46 +299,110 @@ class AnimatedProgressBar extends StatelessWidget {
   }
 }
 
-/// Ambient vibrant background with organic forest base and glowing mesh orbs
-class NuroPlayBackground extends StatelessWidget {
-  final Widget child;
+/// Electrifying Black & Cerulean Blue background with a luminous "Neon Rise" in the middle (Matiks style)
+typedef NuroPlayBackground = NeonRiseBackground;
 
-  const NuroPlayBackground({super.key, required this.child});
+class NeonRiseBackground extends StatelessWidget {
+  final Widget child;
+  final bool showMiddleBeam;
+
+  const NeonRiseBackground({
+    super.key,
+    required this.child,
+    this.showMiddleBeam = true,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Stack(
+      fit: StackFit.expand,
       children: [
-        // Base dark organic pine background
-        Positioned.fill(
+        // Base pure obsidian black background
+        Container(
+          color: AppColors.primaryBg,
+        ),
+
+        // ─── NEON RISE IN THE MIDDLE ───
+        // 1. Massive Center Cerulean Core Glow
+        Center(
           child: Container(
-            color: AppColors.primaryBg,
+            width: 360,
+            height: 360,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                center: Alignment.center,
+                radius: 0.85,
+                colors: [
+                  AppColors.primaryAccent.withOpacity(0.24), // Vibrant Cerulean Rise
+                  AppColors.secondaryAccent.withOpacity(0.12), // Cyan aura
+                  Colors.transparent,
+                ],
+                stops: const [0.0, 0.45, 1.0],
+              ),
+            ),
           ),
         ),
 
-        // Glowing Top-Left Neon Lime Orb
-        Positioned(
-          top: -120,
-          left: -100,
+        // 2. Middle Electric Horizon Rise (horizontal neon beam / laser glow)
+        if (showMiddleBeam)
+          Center(
+            child: Container(
+              height: 120,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment.center,
+                  radius: 0.9,
+                  colors: [
+                    AppColors.secondaryAccent.withOpacity(0.16),
+                    AppColors.primaryAccent.withOpacity(0.06),
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.5, 1.0],
+                ),
+              ),
+            ),
+          ),
+
+        // 3. Central Neon Ring Aura
+        Center(
           child: Container(
-            width: 320,
-            height: 320,
+            width: 220,
+            height: 220,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: AppColors.primaryAccent.withOpacity(0.10),
+                width: 1.5,
+              ),
+            ),
+          ),
+        ),
+
+        // 4. Subtle Top-Right Ambient Cerulean Cyan Orb
+        Positioned(
+          top: -100,
+          right: -80,
+          child: Container(
+            width: 280,
+            height: 280,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  AppColors.primaryAccent.withOpacity(0.12),
-                  AppColors.primaryAccent.withOpacity(0.0),
+                  AppColors.secondaryAccent.withOpacity(0.12),
+                  Colors.transparent,
                 ],
               ),
             ),
           ),
         ),
 
-        // Glowing Top-Right Sunset Coral Orb
+        // 5. Subtle Bottom-Left Deep Midnight Cerulean Orb
         Positioned(
-          top: 40,
-          right: -120,
+          bottom: -120,
+          left: -80,
           child: Container(
             width: 300,
             height: 300,
@@ -346,34 +410,15 @@ class NuroPlayBackground extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  AppColors.secondaryAccent.withOpacity(0.10),
-                  AppColors.secondaryAccent.withOpacity(0.0),
+                  AppColors.primaryAccent.withOpacity(0.10),
+                  Colors.transparent,
                 ],
               ),
             ),
           ),
         ),
 
-        // Glowing Bottom-Center Cyan / Violet Orb
-        Positioned(
-          bottom: -100,
-          left: 40,
-          child: Container(
-            width: 360,
-            height: 360,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  AppColors.accentCyan.withOpacity(0.08),
-                  AppColors.accentPurple.withOpacity(0.0),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-        // Foreground content
+        // Foreground application content
         Positioned.fill(child: child),
       ],
     );

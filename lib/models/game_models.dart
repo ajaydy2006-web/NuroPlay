@@ -15,10 +15,10 @@ extension DifficultyExtension on Difficulty {
 
   Color get color {
     switch (this) {
-      case Difficulty.easy: return const Color(0xFF4ADE80);
-      case Difficulty.medium: return const Color(0xFFFFC857);
-      case Difficulty.hard: return const Color(0xFFFF647C);
-      case Difficulty.expert: return const Color(0xFF8A7CFF);
+      case Difficulty.easy: return const Color(0xFF00F5A0);
+      case Difficulty.medium: return const Color(0xFF0091FF);
+      case Difficulty.hard: return const Color(0xFFFFB800);
+      case Difficulty.expert: return const Color(0xFFFF2A6D);
     }
   }
 

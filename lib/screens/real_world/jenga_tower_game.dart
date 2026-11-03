@@ -331,47 +331,55 @@ class _JengaTowerGameState extends State<JengaTowerGame>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundDark,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Column(
-          children: [
-            Text('Jenga Tower', style: AppTypography.headingMedium),
-            Text(
-              _mode == JengaGameMode.solo
-                  ? 'Solo Tower Builder'
-                  : _mode == JengaGameMode.passAndPlay
-                      ? 'Pass & Play: Player $_currentPlayer'
-                      : _isAiTurn
-                          ? 'WoodBot is thinking...'
-                          : 'Your Turn',
-              style: AppTypography.captionSmall.copyWith(
-                color: _currentPlayer == 1 ? AppColors.primaryAccent : AppColors.warning,
-                fontWeight: FontWeight.bold,
+      body: NeonRiseBackground(
+        showMiddleBeam: true,
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Custom Header for Phone Screen
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 20),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Jenga Tower', style: AppTypography.heading3.copyWith(fontSize: 16)),
+                          Text(
+                            _mode == JengaGameMode.solo
+                                ? 'Solo Tower Builder'
+                                : _mode == JengaGameMode.passAndPlay
+                                    ? 'Pass & Play: Player $_currentPlayer'
+                                    : _isAiTurn
+                                        ? 'WoodBot is thinking...'
+                                        : 'Your Turn',
+                            style: AppTypography.captionSmall.copyWith(
+                              color: _currentPlayer == 1 ? AppColors.primaryAccent : AppColors.warning,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.info_outline_rounded, color: AppColors.textSecondary, size: 20),
+                      onPressed: _showRulesDialog,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.refresh_rounded, color: AppColors.primaryAccent, size: 20),
+                      onPressed: () => setState(_initTower),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline_rounded, color: AppColors.textSecondary),
-            onPressed: _showRulesDialog,
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: AppColors.textSecondary),
-            onPressed: () => setState(_initTower),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Mode & Instability Header
+
+              // Mode & Instability Header
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
@@ -758,8 +766,9 @@ class _JengaTowerGameState extends State<JengaTowerGame>
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   void _showRulesDialog() {
     showDialog(

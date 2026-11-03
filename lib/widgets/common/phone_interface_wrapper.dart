@@ -43,9 +43,28 @@ class _PhoneInterfaceWrapperState extends State<PhoneInterfaceWrapper> {
         final targetHeight = min(_activePreset.height, constraints.maxHeight - 50);
 
         return Scaffold(
-          backgroundColor: const Color(0xFF070D09),
+          backgroundColor: const Color(0xFF030509),
           body: Stack(
             children: [
+              // Central Neon Rise bloom on canvas
+              Center(
+                child: Container(
+                  width: 500,
+                  height: 500,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        AppColors.primaryAccent.withOpacity(0.14),
+                        AppColors.secondaryAccent.withOpacity(0.06),
+                        Colors.transparent,
+                      ],
+                      stops: const [0.0, 0.45, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+
               // Subtle background mesh orbs on desktop canvas
               Positioned(
                 top: -80,
@@ -57,7 +76,7 @@ class _PhoneInterfaceWrapperState extends State<PhoneInterfaceWrapper> {
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        AppColors.primaryAccent.withOpacity(0.08),
+                        AppColors.secondaryAccent.withOpacity(0.08),
                         Colors.transparent,
                       ],
                     ),
@@ -74,7 +93,7 @@ class _PhoneInterfaceWrapperState extends State<PhoneInterfaceWrapper> {
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        AppColors.secondaryAccent.withOpacity(0.07),
+                        AppColors.primaryAccent.withOpacity(0.07),
                         Colors.transparent,
                       ],
                     ),
@@ -105,7 +124,7 @@ class _PhoneInterfaceWrapperState extends State<PhoneInterfaceWrapper> {
                                   gradient: AppColors.vibrantMixGradient,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Icon(Icons.phone_iphone_rounded, size: 16, color: Colors.black),
+                                child: const Icon(Icons.phone_iphone_rounded, size: 16, color: Colors.white),
                               ),
                               const SizedBox(width: 8),
                               Text(
@@ -143,7 +162,7 @@ class _PhoneInterfaceWrapperState extends State<PhoneInterfaceWrapper> {
                                       style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.bold,
-                                        color: isSel ? Colors.black : AppColors.secondaryText,
+                                        color: isSel ? Colors.white : AppColors.secondaryText,
                                       ),
                                     ),
                                   ),
@@ -166,20 +185,20 @@ class _PhoneInterfaceWrapperState extends State<PhoneInterfaceWrapper> {
                             color: AppColors.primaryBg,
                             borderRadius: BorderRadius.circular(_activePreset.radius),
                             border: Border.all(
-                              color: const Color(0xFF2C4535),
+                              color: const Color(0xFF142036),
                               width: 8,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.75),
+                                color: Colors.black.withOpacity(0.85),
                                 blurRadius: 40,
                                 spreadRadius: 4,
                                 offset: const Offset(0, 16),
                               ),
                               BoxShadow(
-                                color: AppColors.primaryAccent.withOpacity(0.12),
-                                blurRadius: 24,
-                                spreadRadius: 0,
+                                color: AppColors.primaryAccent.withOpacity(0.20),
+                                blurRadius: 28,
+                                spreadRadius: 1,
                               ),
                             ],
                           ),
@@ -187,42 +206,52 @@ class _PhoneInterfaceWrapperState extends State<PhoneInterfaceWrapper> {
                             borderRadius: BorderRadius.circular(_activePreset.radius - 8),
                             child: Stack(
                               children: [
-                                // Inner App Application
-                                Positioned.fill(child: widget.child),
+                                // Inner App Application with proper simulated SafeArea insets
+                                Positioned.fill(
+                                  child: MediaQuery(
+                                    data: MediaQuery.of(context).copyWith(
+                                      padding: const EdgeInsets.only(top: 42, bottom: 22),
+                                      viewPadding: const EdgeInsets.only(top: 42, bottom: 22),
+                                    ),
+                                    child: widget.child,
+                                  ),
+                                ),
 
                                 // Phone Notch / Dynamic Island at top
                                 Positioned(
                                   top: 10,
                                   left: 0,
                                   right: 0,
-                                  child: Center(
-                                    child: Container(
-                                      width: 120,
-                                      height: 26,
-                                      decoration: BoxDecoration(
-                                        color: Colors.black,
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Container(
-                                            width: 10,
-                                            height: 10,
-                                            decoration: const BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: Color(0xFF1E293B),
+                                  child: IgnorePointer(
+                                    child: Center(
+                                      child: Container(
+                                        width: 116,
+                                        height: 24,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black,
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            Container(
+                                              width: 10,
+                                              height: 10,
+                                              decoration: const BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Color(0xFF0F172A),
+                                              ),
                                             ),
-                                          ),
-                                          Container(
-                                            width: 8,
-                                            height: 8,
-                                            decoration: const BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: Color(0xFF0F172A),
+                                            Container(
+                                              width: 7,
+                                              height: 7,
+                                              decoration: const BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Color(0xFF0091FF),
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -233,13 +262,15 @@ class _PhoneInterfaceWrapperState extends State<PhoneInterfaceWrapper> {
                                   bottom: 6,
                                   left: 0,
                                   right: 0,
-                                  child: Center(
-                                    child: Container(
-                                      width: 120,
-                                      height: 4,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.35),
-                                        borderRadius: BorderRadius.circular(2),
+                                  child: IgnorePointer(
+                                    child: Center(
+                                      child: Container(
+                                        width: 120,
+                                        height: 4,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.35),
+                                          borderRadius: BorderRadius.circular(2),
+                                        ),
                                       ),
                                     ),
                                   ),

@@ -118,7 +118,7 @@ class _ReflexDuelGameState extends State<ReflexDuelGame> {
                   onTap: () => _onP2Tapped(),
                   behavior: HitTestBehavior.opaque,
                   child: Container(
-                    margin: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: _state == _DuelState.activeGreen
                           ? AppColors.success.withOpacity(0.3)
@@ -128,8 +128,14 @@ class _ReflexDuelGameState extends State<ReflexDuelGame> {
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
                         color: _state == _DuelState.activeGreen ? AppColors.success : AppColors.secondaryAccent,
-                        width: 2,
+                        width: 2.5,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: (_state == _DuelState.activeGreen ? AppColors.success : AppColors.secondaryAccent).withOpacity(0.15),
+                          blurRadius: 16,
+                        ),
+                      ],
                     ),
                     child: Center(
                       child: Column(
@@ -139,13 +145,13 @@ class _ReflexDuelGameState extends State<ReflexDuelGame> {
                             _isTwoPlayer ? 'PLAYER 2' : 'AI OPPONENT 🤖',
                             style: AppTypography.labelLarge.copyWith(color: AppColors.secondaryAccent),
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 8),
                           Text(
                             '$_p2Score',
-                            style: AppTypography.monoLarge.copyWith(fontSize: 64, color: AppColors.secondaryAccent),
+                            style: AppTypography.monoLarge.copyWith(fontSize: 60, color: AppColors.secondaryAccent),
                           ),
-                          const SizedBox(height: 8),
-                          Text('Tap this half on Green', style: AppTypography.bodySmall),
+                          const SizedBox(height: 6),
+                          Text('Tap this half on Green', style: AppTypography.bodySmall.copyWith(color: AppColors.secondaryText)),
                         ],
                       ),
                     ),
@@ -154,18 +160,23 @@ class _ReflexDuelGameState extends State<ReflexDuelGame> {
               ),
             ),
 
-            // Middle Control & Status Divider
+            // Middle Control & Status Divider (Electrifying neon bar)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: AppColors.elevatedCard,
-                border: Border.symmetric(horizontal: BorderSide(color: AppColors.divider)),
+                border: const Border.symmetric(horizontal: BorderSide(color: AppColors.divider)),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primaryAccent.withOpacity(0.1),
+                    blurRadius: 10,
+                  ),
+                ],
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_rounded, color: AppColors.secondaryText),
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.secondaryText, size: 18),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   Expanded(
@@ -178,12 +189,15 @@ class _ReflexDuelGameState extends State<ReflexDuelGame> {
                             color: _state == _DuelState.activeGreen ? AppColors.success : AppColors.primaryText,
                             fontWeight: FontWeight.w700,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,
                         ),
-                        Text('First to $_targetScore points wins', style: AppTypography.bodySmall.copyWith(fontSize: 10)),
+                        Text('First to $_targetScore points wins', style: AppTypography.captionSmall.copyWith(fontSize: 10, color: AppColors.secondaryText)),
                       ],
                     ),
                   ),
+                  const SizedBox(width: 6),
                   if (_state == _DuelState.ready || _state == _DuelState.roundResult)
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -202,7 +216,7 @@ class _ReflexDuelGameState extends State<ReflexDuelGame> {
                       child: const Text('Rematch'),
                     )
                   else
-                    const SizedBox(width: 48),
+                    const SizedBox(width: 44),
                 ],
               ),
             ),
@@ -213,7 +227,7 @@ class _ReflexDuelGameState extends State<ReflexDuelGame> {
                 onTap: _onP1Tapped,
                 behavior: HitTestBehavior.opaque,
                 child: Container(
-                  margin: const EdgeInsets.all(12),
+                  margin: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: _state == _DuelState.activeGreen
                         ? AppColors.success.withOpacity(0.3)
@@ -223,21 +237,27 @@ class _ReflexDuelGameState extends State<ReflexDuelGame> {
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
                       color: _state == _DuelState.activeGreen ? AppColors.success : AppColors.primaryAccent,
-                      width: 2,
+                      width: 2.5,
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (_state == _DuelState.activeGreen ? AppColors.success : AppColors.primaryAccent).withOpacity(0.15),
+                        blurRadius: 16,
+                      ),
+                    ],
                   ),
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text('PLAYER 1', style: AppTypography.labelLarge.copyWith(color: AppColors.primaryAccent)),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 8),
                         Text(
                           '$_p1Score',
-                          style: AppTypography.monoLarge.copyWith(fontSize: 64, color: AppColors.primaryAccent),
+                          style: AppTypography.monoLarge.copyWith(fontSize: 60, color: AppColors.primaryAccent),
                         ),
-                        const SizedBox(height: 8),
-                        Text('Tap this half on Green', style: AppTypography.bodySmall),
+                        const SizedBox(height: 6),
+                        Text('Tap this half on Green', style: AppTypography.bodySmall.copyWith(color: AppColors.secondaryText)),
                       ],
                     ),
                   ),

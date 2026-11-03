@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../widgets/game/game_widgets.dart';
+import '../../../widgets/common/common_widgets.dart';
 import '../../../providers/game_provider.dart';
 import '../../../models/game_models.dart';
 
@@ -137,7 +138,8 @@ class _DuelGameScreenState extends State<DuelGameScreen> {
           },
           child: Scaffold(
             backgroundColor: AppColors.primaryBg,
-            body: SafeArea(
+            body: NeonRiseBackground(
+              child: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 child: Column(
@@ -277,6 +279,7 @@ class _DuelGameScreenState extends State<DuelGameScreen> {
                   ],
                 ),
               ),
+            ),
             ),
           ),
         );

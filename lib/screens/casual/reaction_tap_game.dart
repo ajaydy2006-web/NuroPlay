@@ -97,12 +97,14 @@ class _ReactionTapGameState extends State<ReactionTapGame> {
         ),
         title: Text('Reaction Tap', style: AppTypography.heading4),
       ),
-      body: SafeArea(
+      body: NeonRiseBackground(
+        child: SafeArea(
         child: Column(
           children: [
             // Stats bar
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -151,6 +153,7 @@ class _ReactionTapGameState extends State<ReactionTapGame> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

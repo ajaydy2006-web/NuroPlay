@@ -51,7 +51,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       icon: Icons.sports_football_rounded,
       tags: ['Physics', 'Touchdown', 'Field Goal', 'vs AI / 2P'],
       route: '/game-paper-football',
-      accentColor: Color(0xFF52E0C0),
+      accentColor: Color(0xFF00D2FF),
       rules: '• Slide the paper triangle across the table so it hangs over the opposite edge without falling off for a Touchdown (6 pts)!\n• Complete the extra point / field goal by flicking through the goal posts!',
     ),
     RealWorldGameInfo(
@@ -63,7 +63,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       icon: Icons.flight_takeoff_rounded,
       tags: ['Aerodynamics', 'Wind Vectors', 'Rings', '3 Fold Styles'],
       route: '/game-paper-plane',
-      accentColor: Color(0xFF38BDF8),
+      accentColor: Color(0xFF0091FF),
       rules: '• Choose Dart (speed), Glider (lift), or Acrobat (balanced).\n• Drag back to charge launch thrust and set pitch angle.\n• Ride tailwinds, avoid headwinds, and fly through glowing rings for bonus multipliers!',
     ),
     RealWorldGameInfo(
@@ -75,7 +75,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       icon: Icons.lens_blur_rounded,
       tags: ['Billiard Physics', 'Rebound Cushions', 'Queen Cover', 'Striker Aim'],
       route: '/game-mini-carrom',
-      accentColor: Color(0xFFF59E0B),
+      accentColor: Color(0xFF00E5FF),
       rules: '• Position striker along the baseline with the horizontal slider.\n• Drag back from the striker to aim and charge shot power.\n• Pocket white (10pts), black (5pts), and the Queen (25pts) with a subsequent cover!',
     ),
     RealWorldGameInfo(
@@ -87,7 +87,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       icon: Icons.sports_baseball_rounded,
       tags: ['3D Trajectory', 'Gravity Arc', 'Pyramid Cups', 'Streak Bonus'],
       route: '/game-cup-pong',
-      accentColor: Color(0xFFEF4444),
+      accentColor: Color(0xFFFF2A6D),
       rules: '• Drag back or flick forward from the bottom of the screen to throw.\n• Land inside red cups to eliminate them from the table.\n• Clear all 6 cups with remaining balls to set high scores!',
     ),
     RealWorldGameInfo(
@@ -99,7 +99,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       icon: Icons.circle_outlined,
       tags: ['Elastic Collisions', 'Ring Boundary', 'Momentum', 'Precision Flick'],
       route: '/game-marble-knockout',
-      accentColor: Color(0xFFA855F7),
+      accentColor: Color(0xFF0091FF),
       rules: '• Aim and release your shooter marble into the ring.\n• Transfer momentum upon collision to knock colored target marbles over the boundary line.\n• Keep your shooter inside the ring to retain your turn!',
     ),
     RealWorldGameInfo(
@@ -111,7 +111,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       icon: Icons.domain_rounded,
       tags: ['Center of Mass', 'Instability Sway', '2P / vs WoodBot', 'High-Rise'],
       route: '/game-jenga',
-      accentColor: Color(0xFFD97706),
+      accentColor: Color(0xFFFFB800),
       rules: '• Tap any wooden block on floors below the top 2.\n• Drag the extraction slider steadily—removing key corner blocks increases tower sway and instability!\n• Successfully extracted blocks are stacked on top.\n• The player who topples the tower loses!',
     ),
     RealWorldGameInfo(
@@ -123,7 +123,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       icon: Icons.grid_3x3_rounded,
       tags: ['Minimax AI', 'Pass & Play', 'Win Streaks', 'Turn Tactics'],
       route: '/game-tictactoe',
-      accentColor: Color(0xFF10B981),
+      accentColor: Color(0xFF0091FF),
       rules: '• Align 3 of your marks horizontally, vertically, or diagonally.\n• Test your strategies against Smart Minimax AI or battle a friend locally in 2P mode!',
     ),
     RealWorldGameInfo(
@@ -135,7 +135,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       icon: Icons.front_hand_rounded,
       tags: ['Pattern AI', 'Best of 3/5/7', 'Psychology', 'Streaks'],
       route: '/game-rps',
-      accentColor: Color(0xFFEC4899),
+      accentColor: Color(0xFFFF2A6D),
       rules: '• Rock crushes Scissors, Scissors cuts Paper, Paper covers Rock.\n• The AI tracks your recent tendencies and adjusts its predictions in Best-of series!',
     ),
     RealWorldGameInfo(
@@ -147,7 +147,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       icon: Icons.view_column_rounded,
       tags: ['Gravity Drop', 'Heuristic AI', 'Pass & Play', 'Tactical Blocking'],
       route: '/game-four-in-row',
-      accentColor: Color(0xFF6366F1),
+      accentColor: Color(0xFF00D2FF),
       rules: '• Tap any of the 7 columns to drop your color disc into the lowest available slot.\n• Connect 4 discs in a row in any direction to win.\n• Block your opponent before they set up unblockable dual-threat lines!',
     ),
     RealWorldGameInfo(
@@ -159,7 +159,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       icon: Icons.bolt_rounded,
       tags: ['Face-to-Face 2P', 'Millisecond Timer', 'False-Start Penalty', 'vs AI'],
       route: '/game-reflex-duel',
-      accentColor: Color(0xFF8A7CFF),
+      accentColor: Color(0xFF00F5A0),
       rules: '• Hold device flat between two players (or play against ReflexBot).\n• Wait through the red anticipation phase.\n• The INSTANT the screen flashes GREEN, tap your button!\n• Beware: false starts award a point to your opponent!',
     ),
   ];
@@ -570,13 +570,13 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                           Text(
                             'Play',
                             style: TextStyle(
-                              color: Colors.black,
+                              color: Colors.white,
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
                             ),
                           ),
                           SizedBox(width: 4),
-                          Icon(Icons.play_arrow_rounded, color: Colors.black, size: 18),
+                          Icon(Icons.play_arrow_rounded, color: Colors.white, size: 18),
                         ],
                       ),
                     ),

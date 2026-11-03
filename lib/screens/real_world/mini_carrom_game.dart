@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
+import '../../widgets/common/common_widgets.dart';
 import '../../services/storage_service.dart';
 
 class MiniCarromGame extends StatefulWidget {
@@ -217,199 +218,223 @@ class _MiniCarromGameState extends State<MiniCarromGame> with SingleTickerProvid
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primaryBg,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.primaryText),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text('Mini Carrom Tabletop', style: AppTypography.heading4),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.replay_rounded, color: AppColors.primaryAccent),
-            onPressed: () => setState(_setupBoard),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Column(
-            children: [
-              // Score & Shots
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.cardBg,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.divider),
+      body: NeonRiseBackground(
+        showMiddleBeam: true,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              children: [
+                // Top Bar
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primaryText, size: 20),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
-                    child: Text('Score: $_score pts', style: AppTypography.monoMedium.copyWith(color: AppColors.primaryAccent, fontSize: 16)),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.cardBg,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.warning.withOpacity(0.5)),
+                    Expanded(
+                      child: Text('Mini Carrom Tabletop', style: AppTypography.heading3, textAlign: TextAlign.center),
                     ),
-                    child: Text('Shots Left: $_shotsRemaining', style: AppTypography.labelSmall.copyWith(color: AppColors.warning)),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 10),
-              Text('Pull back on the striker to aim & charge power, release to strike!', style: AppTypography.bodySmall, textAlign: TextAlign.center),
-
-              const Spacer(),
-
-              // Carrom Board
-              Center(
-                child: GestureDetector(
-                  onPanStart: _onPanStart,
-                  onPanUpdate: _onPanUpdate,
-                  onPanEnd: _onPanEnd,
-                  child: Container(
-                    width: _boardSize,
-                    height: _boardSize,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE2C9A1), // Plywood Carrom Surface
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFF5D381E), width: 14), // Wooden Frame
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.5),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
+                    IconButton(
+                      icon: const Icon(Icons.replay_rounded, color: AppColors.primaryAccent),
+                      onPressed: () => setState(_setupBoard),
                     ),
-                    child: Stack(
-                      children: [
-                        // Corner Pockets
-                        ..._pockets.map((p) {
-                          return Positioned(
-                            left: p.dx - _pocketRadius,
-                            top: p.dy - _pocketRadius,
-                            child: Container(
-                              width: _pocketRadius * 2,
-                              height: _pocketRadius * 2,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Color(0xFF111827),
-                              ),
-                            ),
-                          );
-                        }),
+                  ],
+                ),
 
-                        // Center Circle
-                        Center(
+                const SizedBox(height: 6),
+
+                // Score & Shots
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.cardBg,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.divider),
+                      ),
+                      child: Text('Score: $_score pts', style: AppTypography.monoMedium.copyWith(color: AppColors.primaryAccent, fontSize: 15)),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.cardBg,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.warning.withOpacity(0.5)),
+                      ),
+                      child: Text('Shots Left: $_shotsRemaining', style: AppTypography.labelSmall.copyWith(color: AppColors.warning)),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 6),
+                Text(
+                  'Pull back on striker to aim & power, release to strike!',
+                  style: AppTypography.bodySmall.copyWith(color: AppColors.secondaryText),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 6),
+
+                // Responsive Carrom Board scaled to phone screen
+                Expanded(
+                  child: Center(
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: SizedBox(
+                        width: _boardSize,
+                        height: _boardSize,
+                        child: GestureDetector(
+                          onPanStart: _onPanStart,
+                          onPanUpdate: _onPanUpdate,
+                          onPanEnd: _onPanEnd,
                           child: Container(
-                            width: 60,
-                            height: 60,
                             decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: const Color(0xFFB45309), width: 2),
+                              color: const Color(0xFFE2C9A1), // Plywood Carrom Surface
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: const Color(0xFF5D381E), width: 14), // Wooden Frame
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.6),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 8),
+                                ),
+                                BoxShadow(
+                                  color: AppColors.primaryAccent.withOpacity(0.18),
+                                  blurRadius: 18,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                // Corner Pockets
+                                ..._pockets.map((p) {
+                                  return Positioned(
+                                    left: p.dx - _pocketRadius,
+                                    top: p.dy - _pocketRadius,
+                                    child: Container(
+                                      width: _pocketRadius * 2,
+                                      height: _pocketRadius * 2,
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Color(0xFF111827),
+                                      ),
+                                    ),
+                                  );
+                                }),
+
+                                // Center Circle
+                                Center(
+                                  child: Container(
+                                    width: 60,
+                                    height: 60,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: const Color(0xFFB45309), width: 2),
+                                    ),
+                                  ),
+                                ),
+
+                                // Baseline
+                                Positioned(
+                                  left: 40,
+                                  right: 40,
+                                  bottom: 55,
+                                  child: Container(height: 1.5, color: const Color(0xFFB45309)),
+                                ),
+
+                                // Aiming Vector Line
+                                if (_dragStart != null && _dragCurrent != null && !_isShooting)
+                                  CustomPaint(
+                                    size: const Size(_boardSize, _boardSize),
+                                    painter: _CarromAimPainter(
+                                      strikerPos: _striker.pos,
+                                      dragStart: _dragStart!,
+                                      dragCurrent: _dragCurrent!,
+                                    ),
+                                  ),
+
+                                // Carrom Coins
+                                ..._coins.where((c) => !c.isPocketed).map((c) {
+                                  return Positioned(
+                                    left: c.pos.dx - c.radius,
+                                    top: c.pos.dy - c.radius,
+                                    child: Container(
+                                      width: c.radius * 2,
+                                      height: c.radius * 2,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: c.color,
+                                        border: Border.all(color: Colors.black.withOpacity(0.4), width: 1),
+                                        boxShadow: [
+                                          BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 4),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }),
+
+                                // Striker
+                                if (!_striker.isPocketed)
+                                  Positioned(
+                                    left: _striker.pos.dx - _striker.radius,
+                                    top: _striker.pos.dy - _striker.radius,
+                                    child: Container(
+                                      width: _striker.radius * 2,
+                                      height: _striker.radius * 2,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        gradient: AppColors.accentGradient,
+                                        border: Border.all(color: Colors.white, width: 2),
+                                        boxShadow: [
+                                          BoxShadow(color: AppColors.primaryAccent.withOpacity(0.5), blurRadius: 8),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                         ),
-
-                        // Baseline
-                        Positioned(
-                          left: 40,
-                          right: 40,
-                          bottom: 55,
-                          child: Container(height: 1.5, color: const Color(0xFFB45309)),
-                        ),
-
-                        // Aiming Vector Line
-                        if (_dragStart != null && _dragCurrent != null && !_isShooting)
-                          CustomPaint(
-                            painter: _CarromAimPainter(
-                              strikerPos: _striker.pos,
-                              dragStart: _dragStart!,
-                              dragCurrent: _dragCurrent!,
-                            ),
-                          ),
-
-                        // Carrom Coins
-                        ..._coins.where((c) => !c.isPocketed).map((c) {
-                          return Positioned(
-                            left: c.pos.dx - c.radius,
-                            top: c.pos.dy - c.radius,
-                            child: Container(
-                              width: c.radius * 2,
-                              height: c.radius * 2,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: c.color,
-                                border: Border.all(color: Colors.black.withOpacity(0.4), width: 1),
-                                boxShadow: [
-                                  BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 4),
-                                ],
-                              ),
-                            ),
-                          );
-                        }),
-
-                        // Striker
-                        if (!_striker.isPocketed)
-                          Positioned(
-                            left: _striker.pos.dx - _striker.radius,
-                            top: _striker.pos.dy - _striker.radius,
-                            child: Container(
-                              width: _striker.radius * 2,
-                              height: _striker.radius * 2,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: AppColors.accentGradient,
-                                border: Border.all(color: Colors.white, width: 2),
-                                boxShadow: [
-                                  BoxShadow(color: AppColors.primaryAccent.withOpacity(0.5), blurRadius: 8),
-                                ],
-                              ),
-                            ),
-                          ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              const Spacer(),
+                const SizedBox(height: 8),
 
-              if (_gameOver)
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppColors.elevatedCard,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.primaryAccent),
+                if (_gameOver)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.only(bottom: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.elevatedCard,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.primaryAccent),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Match Completed!', style: AppTypography.heading4),
+                            Text('Final Score: $_score points', style: AppTypography.labelSmall.copyWith(color: AppColors.primaryAccent)),
+                          ],
+                        ),
+                        ElevatedButton(
+                          onPressed: () => setState(_setupBoard),
+                          child: const Text('Play Again'),
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Match Completed!', style: AppTypography.heading4),
-                          Text('Final Score: $_score points', style: AppTypography.labelSmall.copyWith(color: AppColors.primaryAccent)),
-                        ],
-                      ),
-                      ElevatedButton(
-                        onPressed: () => setState(_setupBoard),
-                        child: const Text('Play Again'),
-                      ),
-                    ],
-                  ),
-                ),
-
-              const SizedBox(height: 16),
-            ],
+              ],
+            ),
           ),
         ),
       ),

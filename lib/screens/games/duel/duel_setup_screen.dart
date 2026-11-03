@@ -47,7 +47,8 @@ class _DuelSetupScreenState extends State<DuelSetupScreen> {
             ),
             title: Text('1v1 Math Duel', style: AppTypography.heading3),
           ),
-          body: SafeArea(
+          body: NeonRiseBackground(
+            child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -239,6 +240,7 @@ class _DuelSetupScreenState extends State<DuelSetupScreen> {
                 ],
               ),
             ),
+          ),
           ),
         );
       },

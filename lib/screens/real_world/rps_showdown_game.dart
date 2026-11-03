@@ -149,216 +149,241 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primaryBg,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.primaryText),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text('Rock Paper Scissors Showdown', style: AppTypography.heading4),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.replay_rounded, color: AppColors.primaryAccent),
-            onPressed: _resetMatch,
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Column(
-            children: [
-              // Target Wins Selector (First to 3, 5, 7)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [3, 5, 7].map((target) {
-                  final isSel = _targetWins == target;
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() => _targetWins = target);
-                      _resetMatch();
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 6),
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: isSel ? AppColors.primaryAccent.withOpacity(0.2) : AppColors.cardBg,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: isSel ? AppColors.primaryAccent : AppColors.divider),
-                      ),
-                      child: Text(
-                        'First to $target',
-                        style: AppTypography.labelSmall.copyWith(
-                          color: isSel ? AppColors.primaryAccent : AppColors.secondaryText,
-                          fontWeight: isSel ? FontWeight.w700 : FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Scoreboard
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildScorePill('You', _playerScore, AppColors.primaryAccent),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.cardBg,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text('Draws: $_draws', style: AppTypography.bodySmall),
-                  ),
-                  _buildScorePill('AI Bot', _aiScore, AppColors.secondaryAccent),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // Status message
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: AppColors.elevatedCard,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.divider),
-                ),
-                child: Text(
-                  _outcomeText,
-                  style: AppTypography.labelMedium.copyWith(color: AppColors.primaryText),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-
-              const Spacer(),
-
-              // Arena Duel Reveal Area
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
-                decoration: BoxDecoration(
-                  color: AppColors.cardBg,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: AppColors.divider, width: 2),
-                ),
-                child: _phase == _RpsPhase.countdown
-                    ? Center(
-                        child: Text(
-                          '$_countdownValue',
-                          style: AppTypography.monoLarge.copyWith(fontSize: 72, color: AppColors.primaryAccent),
-                        ),
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          // Player Choice
-                          Column(
-                            children: [
-                              Text(
-                                _playerChoice != null ? _getEmoji(_playerChoice!) : '❓',
-                                style: const TextStyle(fontSize: 64),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                _playerChoice != null ? _getLabel(_playerChoice!) : 'You',
-                                style: AppTypography.labelMedium.copyWith(color: AppColors.primaryAccent),
-                              ),
-                            ],
-                          ),
-
-                          Text('VS', style: AppTypography.heading3.copyWith(color: AppColors.secondaryText)),
-
-                          // AI Choice
-                          Column(
-                            children: [
-                              Text(
-                                _aiChoice != null ? _getEmoji(_aiChoice!) : '🤖',
-                                style: const TextStyle(fontSize: 64),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                _aiChoice != null ? _getLabel(_aiChoice!) : 'AI Bot',
-                                style: AppTypography.labelMedium.copyWith(color: AppColors.secondaryAccent),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-              ),
-
-              const Spacer(),
-
-              // 3 Move Selection Cards
-              if (_phase == _RpsPhase.choose) ...[
+      body: NeonRiseBackground(
+        showMiddleBeam: true,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              children: [
+                // Top App Bar
                 Row(
-                  children: _RpsChoice.values.map((choice) {
-                    return Expanded(
-                      child: GestureDetector(
-                        onTap: () => _onPlayerSelected(choice),
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 6),
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          decoration: BoxDecoration(
-                            color: AppColors.elevatedCard,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: AppColors.primaryAccent.withOpacity(0.4)),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primaryAccent.withOpacity(0.1),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            children: [
-                              Text(_getEmoji(choice), style: const TextStyle(fontSize: 40)),
-                              const SizedBox(height: 6),
-                              Text(_getLabel(choice), style: AppTypography.labelSmall.copyWith(fontWeight: FontWeight.w700)),
-                            ],
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primaryText, size: 20),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                    Expanded(
+                      child: Text('Rock Paper Scissors', style: AppTypography.heading3, textAlign: TextAlign.center),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.replay_rounded, color: AppColors.primaryAccent),
+                      onPressed: _resetMatch,
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 6),
+
+                // Target Wins Selector (First to 3, 5, 7)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [3, 5, 7].map((target) {
+                    final isSel = _targetWins == target;
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() => _targetWins = target);
+                        _resetMatch();
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: isSel ? AppColors.primaryAccent.withOpacity(0.2) : AppColors.cardBg,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: isSel ? AppColors.primaryAccent : AppColors.divider),
+                        ),
+                        child: Text(
+                          'First to $target',
+                          style: AppTypography.labelSmall.copyWith(
+                            color: isSel ? AppColors.primaryAccent : AppColors.secondaryText,
+                            fontWeight: isSel ? FontWeight.w700 : FontWeight.w500,
                           ),
                         ),
                       ),
                     );
                   }).toList(),
                 ),
-              ] else if (_phase == _RpsPhase.matchOver) ...[
+
+                const SizedBox(height: 8),
+
+                // Scoreboard
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildScorePill('You', _playerScore, AppColors.primaryAccent),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.cardBg,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text('Draws: $_draws', style: AppTypography.bodySmall),
+                    ),
+                    _buildScorePill('AI Bot', _aiScore, AppColors.secondaryAccent),
+                  ],
+                ),
+
+                const SizedBox(height: 8),
+
+                // Status message
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   decoration: BoxDecoration(
-                    color: _playerScore >= _targetWins ? AppColors.success.withOpacity(0.2) : AppColors.error.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: _playerScore >= _targetWins ? AppColors.success : AppColors.error),
+                    color: AppColors.elevatedCard,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.divider),
                   ),
-                  child: Column(
-                    children: [
-                      Text(
-                        _playerScore >= _targetWins ? '🏆 MATCH VICTORY!' : '⚡ MATCH DEFEAT',
-                        style: AppTypography.heading3.copyWith(
-                          color: _playerScore >= _targetWins ? AppColors.success : AppColors.error,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text('Final Score: You $_playerScore - $_aiScore AI', style: AppTypography.monoMedium),
-                      const SizedBox(height: 14),
-                      MindRushButton(
-                        label: 'Play Again',
-                        icon: Icons.replay_rounded,
-                        onPressed: _resetMatch,
-                      ),
-                    ],
+                  child: Text(
+                    _outcomeText,
+                    style: AppTypography.labelMedium.copyWith(color: AppColors.primaryText),
+                    textAlign: TextAlign.center,
                   ),
                 ),
-              ],
 
-              const SizedBox(height: 16),
-            ],
+                const SizedBox(height: 8),
+
+                // Responsive Arena Duel Reveal Area
+                Expanded(
+                  child: Center(
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Container(
+                        width: 320,
+                        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+                        decoration: BoxDecoration(
+                          color: AppColors.cardBg,
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: AppColors.primaryAccent.withOpacity(0.4), width: 2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primaryAccent.withOpacity(0.12),
+                              blurRadius: 16,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: _phase == _RpsPhase.countdown
+                            ? Center(
+                                child: Text(
+                                  '$_countdownValue',
+                                  style: AppTypography.monoLarge.copyWith(fontSize: 64, color: AppColors.primaryAccent),
+                                ),
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: [
+                                  // Player Choice
+                                  Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        _playerChoice != null ? _getEmoji(_playerChoice!) : '❓',
+                                        style: const TextStyle(fontSize: 56),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        _playerChoice != null ? _getLabel(_playerChoice!) : 'You',
+                                        style: AppTypography.labelMedium.copyWith(color: AppColors.primaryAccent),
+                                      ),
+                                    ],
+                                  ),
+
+                                  Text('VS', style: AppTypography.heading3.copyWith(color: AppColors.secondaryText)),
+
+                                  // AI Choice
+                                  Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        _aiChoice != null ? _getEmoji(_aiChoice!) : '🤖',
+                                        style: const TextStyle(fontSize: 56),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        _aiChoice != null ? _getLabel(_aiChoice!) : 'AI Bot',
+                                        style: AppTypography.labelMedium.copyWith(color: AppColors.secondaryAccent),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                // 3 Move Selection Cards
+                if (_phase == _RpsPhase.choose) ...[
+                  Row(
+                    children: _RpsChoice.values.map((choice) {
+                      return Expanded(
+                        child: GestureDetector(
+                          onTap: () => _onPlayerSelected(choice),
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            decoration: BoxDecoration(
+                              color: AppColors.elevatedCard,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: AppColors.primaryAccent.withOpacity(0.4)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primaryAccent.withOpacity(0.12),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(_getEmoji(choice), style: const TextStyle(fontSize: 34)),
+                                const SizedBox(height: 4),
+                                Text(_getLabel(choice), style: AppTypography.labelSmall.copyWith(fontWeight: FontWeight.w700)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ] else if (_phase == _RpsPhase.matchOver) ...[
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: _playerScore >= _targetWins ? AppColors.success.withOpacity(0.2) : AppColors.error.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: _playerScore >= _targetWins ? AppColors.success : AppColors.error),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _playerScore >= _targetWins ? '🏆 MATCH VICTORY!' : '⚡ MATCH DEFEAT',
+                          style: AppTypography.heading3.copyWith(
+                            color: _playerScore >= _targetWins ? AppColors.success : AppColors.error,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text('Final Score: You $_playerScore - $_aiScore AI', style: AppTypography.monoMedium),
+                        const SizedBox(height: 10),
+                        MindRushButton(
+                          label: 'Play Again',
+                          icon: Icons.replay_rounded,
+                          onPressed: _resetMatch,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: 8),
+              ],
+            ),
           ),
         ),
       ),

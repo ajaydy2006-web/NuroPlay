@@ -175,196 +175,215 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primaryBg,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.primaryText),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text('Tic-Tac-Toe Arena', style: AppTypography.heading4),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.replay_rounded, color: AppColors.primaryAccent),
-            tooltip: 'Reset Board',
-            onPressed: _resetGame,
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Column(
-            children: [
-              // Mode Toggle (vs AI / 2 Player)
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: AppColors.cardBg,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
+      body: NeonRiseBackground(
+        showMiddleBeam: true,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              children: [
+                // Top App Bar
+                Row(
                   children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() => _mode = _TttMode.vsAi);
-                          _resetGame();
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: BoxDecoration(
-                            color: _mode == _TttMode.vsAi ? AppColors.elevatedCard : Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
-                            border: _mode == _TttMode.vsAi ? Border.all(color: AppColors.primaryAccent) : null,
-                          ),
-                          child: Center(
-                            child: Text('vs AI Bot 🤖', style: AppTypography.labelSmall),
-                          ),
-                        ),
-                      ),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primaryText, size: 20),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
                     Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() => _mode = _TttMode.passAndPlay);
-                          _resetGame();
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: BoxDecoration(
-                            color: _mode == _TttMode.passAndPlay ? AppColors.elevatedCard : Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
-                            border: _mode == _TttMode.passAndPlay ? Border.all(color: AppColors.secondaryAccent) : null,
-                          ),
-                          child: Center(
-                            child: Text('Pass & Play 👥', style: AppTypography.labelSmall),
-                          ),
-                        ),
-                      ),
+                      child: Text('Tic-Tac-Toe Arena', style: AppTypography.heading3, textAlign: TextAlign.center),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.replay_rounded, color: AppColors.primaryAccent),
+                      tooltip: 'Reset Board',
+                      onPressed: _resetGame,
                     ),
                   ],
                 ),
-              ),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 6),
 
-              // Scoreboard
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildScoreCard('Player X', _xWins, AppColors.primaryAccent, _currentPlayer == 'X' && !_isGameOver),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.cardBg,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text('Draws: $_draws', style: AppTypography.bodySmall),
-                  ),
-                  _buildScoreCard(
-                    _mode == _TttMode.vsAi ? 'AI (O)' : 'Player O',
-                    _oWins,
-                    AppColors.secondaryAccent,
-                    _currentPlayer == 'O' && !_isGameOver,
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // Status message
-              if (_isGameOver)
+                // Mode Toggle (vs AI / 2 Player)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: _winner == 'Draw' ? AppColors.warning.withOpacity(0.2) : AppColors.success.withOpacity(0.2),
+                    color: AppColors.cardBg,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _winner == 'Draw' ? AppColors.warning : AppColors.success),
                   ),
-                  child: Text(
-                    _winner == 'Draw' ? '🤝 MATCH TIED!' : '🏆 WINNER: PLAYER $_winner!',
-                    style: AppTypography.heading4.copyWith(
-                      color: _winner == 'Draw' ? AppColors.warning : AppColors.success,
-                    ),
-                  ),
-                )
-              else
-                Text(
-                  'Turn: Player $_currentPlayer (${_currentPlayer == "X" ? "You" : (_mode == _TttMode.vsAi ? "AI" : "Opponent")})',
-                  style: AppTypography.labelMedium,
-                ),
-
-              const Spacer(),
-
-              // 3x3 Grid
-              Center(
-                child: AspectRatio(
-                  aspectRatio: 1.0,
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.cardBg,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: AppColors.divider, width: 2),
-                    ),
-                    child: GridView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: _size,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                      ),
-                      itemCount: 9,
-                      itemBuilder: (context, idx) {
-                        final val = _board[idx];
-                        final isWinning = _winningLine?.contains(idx) ?? false;
-
-                        return GestureDetector(
-                          onTap: () => _onCellTap(idx),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() => _mode = _TttMode.vsAi);
+                            _resetGame();
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
                             decoration: BoxDecoration(
-                              color: isWinning
-                                  ? (val == 'X' ? AppColors.primaryAccent : AppColors.secondaryAccent).withOpacity(0.25)
-                                  : AppColors.elevatedCard,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: isWinning
-                                    ? (val == 'X' ? AppColors.primaryAccent : AppColors.secondaryAccent)
-                                    : AppColors.divider,
-                                width: isWinning ? 2.5 : 1,
-                              ),
+                              color: _mode == _TttMode.vsAi ? AppColors.elevatedCard : Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                              border: _mode == _TttMode.vsAi ? Border.all(color: AppColors.primaryAccent) : null,
                             ),
                             child: Center(
-                              child: Text(
-                                val,
-                                style: AppTypography.monoLarge.copyWith(
-                                  fontSize: 48,
-                                  color: val == 'X' ? AppColors.primaryAccent : AppColors.secondaryAccent,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
+                              child: Text('vs AI Bot 🤖', style: AppTypography.labelSmall),
                             ),
                           ),
-                        );
-                      },
+                        ),
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() => _mode = _TttMode.passAndPlay);
+                            _resetGame();
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            decoration: BoxDecoration(
+                              color: _mode == _TttMode.passAndPlay ? AppColors.elevatedCard : Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                              border: _mode == _TttMode.passAndPlay ? Border.all(color: AppColors.secondaryAccent) : null,
+                            ),
+                            child: Center(
+                              child: Text('Pass & Play 👥', style: AppTypography.labelSmall),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                // Scoreboard
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildScoreCard('Player X', _xWins, AppColors.primaryAccent, _currentPlayer == 'X' && !_isGameOver),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.cardBg,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text('Draws: $_draws', style: AppTypography.bodySmall),
+                    ),
+                    _buildScoreCard(
+                      _mode == _TttMode.vsAi ? 'AI (O)' : 'Player O',
+                      _oWins,
+                      AppColors.secondaryAccent,
+                      _currentPlayer == 'O' && !_isGameOver,
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 8),
+
+                // Status message
+                if (_isGameOver)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _winner == 'Draw' ? AppColors.warning.withOpacity(0.2) : AppColors.success.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: _winner == 'Draw' ? AppColors.warning : AppColors.success),
+                    ),
+                    child: Text(
+                      _winner == 'Draw' ? '🤝 MATCH TIED!' : '🏆 WINNER: PLAYER $_winner!',
+                      style: AppTypography.heading4.copyWith(
+                        color: _winner == 'Draw' ? AppColors.warning : AppColors.success,
+                      ),
+                    ),
+                  )
+                else
+                  Text(
+                    'Turn: Player $_currentPlayer (${_currentPlayer == "X" ? "You" : (_mode == _TttMode.vsAi ? "AI" : "Opponent")})',
+                    style: AppTypography.labelMedium.copyWith(color: AppColors.secondaryText),
+                  ),
+
+                const SizedBox(height: 8),
+
+                // Responsive 3x3 Grid (fitted for phone screen)
+                Expanded(
+                  child: Center(
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Container(
+                        width: 300,
+                        height: 300,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.cardBg,
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: AppColors.primaryAccent.withOpacity(0.4), width: 2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primaryAccent.withOpacity(0.12),
+                              blurRadius: 18,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: GridView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: _size,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                          ),
+                          itemCount: 9,
+                          itemBuilder: (context, idx) {
+                            final val = _board[idx];
+                            final isWinning = _winningLine?.contains(idx) ?? false;
+
+                            return GestureDetector(
+                              onTap: () => _onCellTap(idx),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                decoration: BoxDecoration(
+                                  color: isWinning
+                                      ? (val == 'X' ? AppColors.primaryAccent : AppColors.secondaryAccent).withOpacity(0.25)
+                                      : AppColors.elevatedCard,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: isWinning
+                                        ? (val == 'X' ? AppColors.primaryAccent : AppColors.secondaryAccent)
+                                        : AppColors.divider,
+                                    width: isWinning ? 2.5 : 1,
+                                  ),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    val,
+                                    style: AppTypography.monoLarge.copyWith(
+                                      fontSize: 48,
+                                      color: val == 'X' ? AppColors.primaryAccent : AppColors.secondaryAccent,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              const Spacer(),
+                const SizedBox(height: 8),
 
-              if (_isGameOver)
-                MindRushButton(
-                  label: 'Play Another Round',
-                  icon: Icons.replay_rounded,
-                  onPressed: _resetGame,
-                ),
-
-              const SizedBox(height: 16),
-            ],
+                if (_isGameOver)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: MindRushButton(
+                      label: 'Play Another Round',
+                      icon: Icons.replay_rounded,
+                      onPressed: _resetGame,
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

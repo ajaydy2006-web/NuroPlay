@@ -52,7 +52,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
 
         return Scaffold(
           backgroundColor: AppColors.primaryBg,
-          body: SafeArea(
+          body: NeonRiseBackground(
+            child: SafeArea(
             child: Column(
               children: [
                 // ─── Header ───
@@ -250,8 +251,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
               ],
             ),
           ),
-        );
-      },
+        ),
+      );
+    },
     );
   }
 

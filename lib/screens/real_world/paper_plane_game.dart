@@ -235,103 +235,120 @@ class _PaperPlaneGameState extends State<PaperPlaneGame>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundDark,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Column(
-          children: [
-            Text('Paper Plane Challenge', style: AppTypography.headingMedium),
-            Text(
-              'Attempts Left: $_attemptsLeft • Total: $_totalScore pts',
-              style: AppTypography.captionSmall.copyWith(
-                color: AppColors.primaryAccent,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline_rounded, color: AppColors.textSecondary),
-            onPressed: _showInstructions,
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: AppColors.textSecondary),
-            onPressed: () {
-              setState(() {
-                _attemptsLeft = 5;
-                _totalScore = 0;
-                _resetPlane();
-              });
-            },
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Top HUD: Wind & Plane Selector
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  // Wind Indicator
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceDark,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.surfaceBorder),
+      body: NeonRiseBackground(
+        showMiddleBeam: true,
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Custom Compact Header for Phone Screens
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 20),
+                      onPressed: () => Navigator.pop(context),
                     ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.air_rounded,
-                          size: 16,
-                          color: _windSpeed >= 0 ? AppColors.primaryAccent : AppColors.error,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '${_windSpeed.abs().toStringAsFixed(1)} m/s ${_windSpeed >= 0 ? "Tailwind" : "Headwind"}',
-                          style: AppTypography.captionSmall.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Paper Plane Challenge', style: AppTypography.heading3.copyWith(fontSize: 16)),
+                          Text(
+                            'Tries: $_attemptsLeft • Score: $_totalScore pts',
+                            style: AppTypography.captionSmall.copyWith(
+                              color: AppColors.primaryAccent,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const Spacer(),
-                  // Personal Best
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceDark,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.surfaceBorder),
+                    IconButton(
+                      icon: const Icon(Icons.info_outline_rounded, color: AppColors.textSecondary, size: 20),
+                      onPressed: _showInstructions,
                     ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.emoji_events_rounded, size: 16, color: AppColors.warning),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Best: ${_bestDistance.toStringAsFixed(1)}m',
-                          style: AppTypography.captionSmall.copyWith(
-                            color: AppColors.warning,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                    IconButton(
+                      icon: const Icon(Icons.refresh_rounded, color: AppColors.primaryAccent, size: 20),
+                      onPressed: () {
+                        setState(() {
+                          _attemptsLeft = 5;
+                          _totalScore = 0;
+                          _resetPlane();
+                        });
+                      },
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+
+              // Top HUD: Wind & Personal Best (Responsive)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                child: Row(
+                  children: [
+                    // Wind Indicator
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceDark,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppColors.surfaceBorder),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.air_rounded,
+                              size: 16,
+                              color: _windSpeed >= 0 ? AppColors.primaryAccent : AppColors.error,
+                            ),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                '${_windSpeed.abs().toStringAsFixed(1)}m/s ${_windSpeed >= 0 ? "Tailwind" : "Headwind"}',
+                                style: AppTypography.captionSmall.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Personal Best
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceDark,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.surfaceBorder),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.emoji_events_rounded, size: 16, color: AppColors.warning),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Best: ${_bestDistance.toStringAsFixed(1)}m',
+                            style: AppTypography.captionSmall.copyWith(
+                              color: AppColors.warning,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
             // Plane Fold Model Tabs
             if (!_isInFlight && !_flightFinished)
@@ -484,8 +501,9 @@ class _PaperPlaneGameState extends State<PaperPlaneGame>
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   void _showInstructions() {
     showDialog(

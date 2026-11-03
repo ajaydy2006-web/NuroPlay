@@ -20,51 +20,53 @@ class ProfileScreen extends StatelessWidget {
 
         return Scaffold(
           backgroundColor: AppColors.primaryBg,
-          body: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ─── Header ───
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Player Profile', style: AppTypography.heading2),
-                      IconButton(
-                        onPressed: () => _showSettingsSheet(context, provider),
-                        icon: const Icon(Icons.settings_outlined, color: AppColors.secondaryText),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
+          body: NeonRiseBackground(
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ─── Header ───
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Player Profile', style: AppTypography.heading2),
+                        IconButton(
+                          onPressed: () => _showSettingsSheet(context, provider),
+                          icon: const Icon(Icons.settings_outlined, color: AppColors.secondaryText),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
 
-                  // ─── Profile Card ───
-                  _buildProfileCard(context, profile, provider, title),
-                  const SizedBox(height: 20),
+                    // ─── Profile Card ───
+                    _buildProfileCard(context, profile, provider, title),
+                    const SizedBox(height: 20),
 
-                  // ─── Pro Banner ───
-                  _buildProBanner(context),
-                  const SizedBox(height: 24),
+                    // ─── Pro Banner ───
+                    _buildProBanner(context),
+                    const SizedBox(height: 24),
 
-                  // ─── Performance Stats Grid ───
-                  const SectionHeader(title: 'Cognitive Stats'),
-                  _buildStatsGrid(profile, provider),
-                  const SizedBox(height: 24),
+                    // ─── Performance Stats Grid ───
+                    const SectionHeader(title: 'Cognitive Stats'),
+                    _buildStatsGrid(profile, provider),
+                    const SizedBox(height: 24),
 
-                  // ─── Performance Chart ───
-                  const SectionHeader(title: 'Rating History'),
-                  _buildRatingChart(profile),
-                  const SizedBox(height: 24),
+                    // ─── Performance Chart ───
+                    const SectionHeader(title: 'Rating History'),
+                    _buildRatingChart(profile),
+                    const SizedBox(height: 24),
 
-                  // ─── Achievements ───
-                  SectionHeader(
-                    title: 'Achievements',
-                    actionLabel: '${profile.achievements.length}/${provider.achievements.length} Unlocked',
-                  ),
-                  _buildAchievementsList(provider),
-                  const SizedBox(height: 40),
-                ],
+                    // ─── Achievements ───
+                    SectionHeader(
+                      title: 'Achievements',
+                      actionLabel: '${profile.achievements.length}/${provider.achievements.length} Unlocked',
+                    ),
+                    _buildAchievementsList(provider),
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             ),
           ),

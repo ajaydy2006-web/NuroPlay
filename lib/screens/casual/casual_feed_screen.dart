@@ -183,8 +183,9 @@ class _CasualFeedScreenState extends State<CasualFeedScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.primaryBg,
-      body: SafeArea(
-        child: Stack(
+      body: NeonRiseBackground(
+        child: SafeArea(
+          child: Stack(
           children: [
             // Vertical Swipeable Feed
             PageView.builder(
@@ -278,8 +279,9 @@ class _CasualFeedScreenState extends State<CasualFeedScreen> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildFeedCard(_CasualGameData game) {
     return Container(

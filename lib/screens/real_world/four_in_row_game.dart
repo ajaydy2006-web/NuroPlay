@@ -184,188 +184,203 @@ class _FourInRowGameState extends State<FourInRowGame> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primaryBg,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.primaryText),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text('Four in a Row', style: AppTypography.heading4),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.replay_rounded, color: AppColors.primaryAccent),
-            tooltip: 'Restart Game',
-            onPressed: _resetGame,
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Column(
-            children: [
-              // Mode switcher (vs AI / Pass & Play)
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: AppColors.cardBg,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
+      body: NeonRiseBackground(
+        showMiddleBeam: true,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              children: [
+                // Top App Bar
+                Row(
                   children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() => _isVsAi = true);
-                          _resetGame();
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: BoxDecoration(
-                            color: _isVsAi ? AppColors.elevatedCard : Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
-                            border: _isVsAi ? Border.all(color: AppColors.primaryAccent) : null,
-                          ),
-                          child: Center(
-                            child: Text('vs AI Bot 🤖', style: AppTypography.labelSmall),
-                          ),
-                        ),
-                      ),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primaryText, size: 20),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
                     Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() => _isVsAi = false);
-                          _resetGame();
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: BoxDecoration(
-                            color: !_isVsAi ? AppColors.elevatedCard : Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
-                            border: !_isVsAi ? Border.all(color: AppColors.secondaryAccent) : null,
-                          ),
-                          child: Center(
-                            child: Text('Pass & Play 👥', style: AppTypography.labelSmall),
-                          ),
-                        ),
-                      ),
+                      child: Text('Four in a Row', style: AppTypography.heading3, textAlign: TextAlign.center),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.replay_rounded, color: AppColors.primaryAccent),
+                      tooltip: 'Restart Game',
+                      onPressed: _resetGame,
                     ),
                   ],
                 ),
-              ),
 
-              const SizedBox(height: 12),
+                const SizedBox(height: 6),
 
-              // Scoreboard
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildPlayerCard('Player 1', _p1Wins, AppColors.primaryAccent, _currentPlayer == 1 && !_isGameOver),
-                  _buildPlayerCard(
-                    _isVsAi ? 'AI Bot' : 'Player 2',
-                    _p2Wins,
-                    AppColors.secondaryAccent,
-                    _currentPlayer == 2 && !_isGameOver,
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 12),
-
-              if (_isGameOver)
+                // Mode switcher (vs AI / Pass & Play)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: _winner == 0 ? AppColors.warning.withOpacity(0.2) : AppColors.success.withOpacity(0.2),
+                    color: AppColors.cardBg,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _winner == 0 ? AppColors.warning : AppColors.success),
                   ),
-                  child: Text(
-                    _winner == 0
-                        ? '🤝 DRAW GAME!'
-                        : '🎉 WINNER: ${_winner == 1 ? "PLAYER 1" : (_isVsAi ? "AI BOT" : "PLAYER 2")}!',
-                    style: AppTypography.heading4.copyWith(color: _winner == 0 ? AppColors.warning : AppColors.success),
-                  ),
-                )
-              else
-                Text(
-                  'Tap a column to drop your disc (Player $_currentPlayer)',
-                  style: AppTypography.bodySmall,
-                ),
-
-              const Spacer(),
-
-              // Connect 4 Vertical Board
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E3A8A), // Classic deep blue frame
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: AppColors.primaryAccent.withOpacity(0.4), width: 2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.4),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() => _isVsAi = true);
+                            _resetGame();
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            decoration: BoxDecoration(
+                              color: _isVsAi ? AppColors.elevatedCard : Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                              border: _isVsAi ? Border.all(color: AppColors.primaryAccent) : null,
+                            ),
+                            child: Center(
+                              child: Text('vs AI Bot 🤖', style: AppTypography.labelSmall),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() => _isVsAi = false);
+                            _resetGame();
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            decoration: BoxDecoration(
+                              color: !_isVsAi ? AppColors.elevatedCard : Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                              border: !_isVsAi ? Border.all(color: AppColors.secondaryAccent) : null,
+                            ),
+                            child: Center(
+                              child: Text('Pass & Play 👥', style: AppTypography.labelSmall),
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  child: Column(
-                    children: List.generate(_rows, (r) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(_cols, (c) {
-                          final val = _board[r][c];
-                          final isWinning = _winningCoords?.any((p) => p.x == r && p.y == c) ?? false;
+                ),
 
-                          Color discColor = const Color(0xFF0F172A); // Empty slot hole
-                          if (val == 1) discColor = AppColors.primaryAccent;
-                          if (val == 2) discColor = AppColors.secondaryAccent;
+                const SizedBox(height: 8),
 
-                          return GestureDetector(
-                            onTap: () => _onColumnTap(c),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              width: 38,
-                              height: 38,
-                              margin: const EdgeInsets.all(3),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: discColor,
-                                border: isWinning
-                                    ? Border.all(color: Colors.white, width: 3)
-                                    : Border.all(color: Colors.black.withOpacity(0.3), width: 1.5),
-                                boxShadow: [
-                                  if (val != 0)
-                                    BoxShadow(
-                                      color: discColor.withOpacity(0.5),
-                                      blurRadius: isWinning ? 12 : 4,
-                                    ),
-                                ],
-                              ),
+                // Scoreboard
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildPlayerCard('Player 1', _p1Wins, AppColors.primaryAccent, _currentPlayer == 1 && !_isGameOver),
+                    _buildPlayerCard(
+                      _isVsAi ? 'AI Bot' : 'Player 2',
+                      _p2Wins,
+                      AppColors.secondaryAccent,
+                      _currentPlayer == 2 && !_isGameOver,
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 8),
+
+                if (_isGameOver)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _winner == 0 ? AppColors.warning.withOpacity(0.2) : AppColors.success.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: _winner == 0 ? AppColors.warning : AppColors.success),
+                    ),
+                    child: Text(
+                      _winner == 0
+                          ? '🤝 DRAW GAME!'
+                          : '🎉 WINNER: ${_winner == 1 ? "PLAYER 1" : (_isVsAi ? "AI BOT" : "PLAYER 2")}!',
+                      style: AppTypography.heading4.copyWith(color: _winner == 0 ? AppColors.warning : AppColors.success),
+                    ),
+                  )
+                else
+                  Text(
+                    'Tap a column to drop your disc (Player $_currentPlayer)',
+                    style: AppTypography.bodySmall.copyWith(color: AppColors.secondaryText),
+                  ),
+
+                const SizedBox(height: 8),
+
+                // Responsive Connect 4 Vertical Board (scaled for phone screens)
+                Expanded(
+                  child: Center(
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0F1E36), // Deep cyber blue frame
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: AppColors.primaryAccent.withOpacity(0.5), width: 2.5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primaryAccent.withOpacity(0.18),
+                              blurRadius: 20,
+                              offset: const Offset(0, 6),
                             ),
-                          );
-                        }),
-                      );
-                    }),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: List.generate(_rows, (r) {
+                            return Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(_cols, (c) {
+                                final val = _board[r][c];
+                                final isWinning = _winningCoords?.any((p) => p.x == r && p.y == c) ?? false;
+
+                                Color discColor = const Color(0xFF070B14); // Empty slot hole
+                                if (val == 1) discColor = AppColors.primaryAccent;
+                                if (val == 2) discColor = AppColors.secondaryAccent;
+
+                                return GestureDetector(
+                                  onTap: () => _onColumnTap(c),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    width: 36,
+                                    height: 36,
+                                    margin: const EdgeInsets.all(3),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: discColor,
+                                      border: isWinning
+                                          ? Border.all(color: Colors.white, width: 3)
+                                          : Border.all(color: Colors.black.withOpacity(0.4), width: 1.5),
+                                      boxShadow: [
+                                        if (val != 0)
+                                          BoxShadow(
+                                            color: discColor.withOpacity(0.5),
+                                            blurRadius: isWinning ? 12 : 4,
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }),
+                            );
+                          }),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
 
-              const Spacer(),
+                const SizedBox(height: 8),
 
-              if (_isGameOver)
-                MindRushButton(
-                  label: 'Play Again',
-                  icon: Icons.replay_rounded,
-                  onPressed: _resetGame,
-                ),
-
-              const SizedBox(height: 16),
-            ],
+                if (_isGameOver)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: MindRushButton(
+                      label: 'Play Again',
+                      icon: Icons.replay_rounded,
+                      onPressed: _resetGame,
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

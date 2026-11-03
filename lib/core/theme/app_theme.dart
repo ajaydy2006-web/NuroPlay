@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'app_typography.dart';
 
-/// MindRush Material Theme
+/// MindRush / NuroPlay Material Theme — Electrifying Black & Cerulean Blue
 class AppTheme {
   AppTheme._();
 
@@ -15,15 +15,18 @@ class AppTheme {
           secondary: AppColors.secondaryAccent,
           surface: AppColors.cardBg,
           error: AppColors.error,
-          onPrimary: AppColors.primaryBg,
-          onSecondary: AppColors.primaryText,
+          onPrimary: Colors.white,
+          onSecondary: Colors.white,
           onSurface: AppColors.primaryText,
-          onError: AppColors.primaryText,
+          onError: Colors.white,
         ),
         appBarTheme: AppBarTheme(
           backgroundColor: AppColors.primaryBg,
           elevation: 0,
-          titleTextStyle: AppTypography.heading3,
+          centerTitle: true,
+          titleTextStyle: AppTypography.heading3.copyWith(
+            color: AppColors.primaryText,
+          ),
           iconTheme: const IconThemeData(color: AppColors.primaryText),
         ),
         cardTheme: CardTheme(
@@ -48,12 +51,12 @@ class AppTheme {
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryAccent,
-            foregroundColor: AppColors.primaryBg,
+            foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            textStyle: AppTypography.button,
+            textStyle: AppTypography.button.copyWith(color: Colors.white),
             elevation: 0,
           ),
         ),
@@ -99,7 +102,7 @@ class AppTheme {
         ),
         snackBarTheme: SnackBarThemeData(
           backgroundColor: AppColors.elevatedCard,
-          contentTextStyle: AppTypography.bodyMedium,
+          contentTextStyle: AppTypography.bodyMedium.copyWith(color: AppColors.primaryText),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           behavior: SnackBarBehavior.floating,
         ),

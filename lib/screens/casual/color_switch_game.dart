@@ -133,7 +133,8 @@ class _ColorSwitchGameState extends State<ColorSwitchGame> {
           ),
         ],
       ),
-      body: SafeArea(
+      body: NeonRiseBackground(
+        child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           child: Column(
@@ -286,6 +287,7 @@ class _ColorSwitchGameState extends State<ColorSwitchGame> {
             ],
           ),
         ),
+      ),
       ),
     );
   }
