@@ -146,17 +146,19 @@ class AppTypography {
   );
 
   // ─── Buttons ───
-  static TextStyle button = GoogleFonts.titanOne(
+  static TextStyle button = GoogleFonts.plusJakartaSans(
     fontSize: 16,
-    color: AppColors.primaryBg,
-    letterSpacing: 0.5,
+    fontWeight: FontWeight.w700,
+    color: Colors.white,
+    letterSpacing: 0.3,
     height: 1.3,
   );
 
-  static TextStyle buttonSmall = GoogleFonts.titanOne(
+  static TextStyle buttonSmall = GoogleFonts.plusJakartaSans(
     fontSize: 14,
-    color: AppColors.primaryBg,
-    letterSpacing: 0.4,
+    fontWeight: FontWeight.w700,
+    color: Colors.white,
+    letterSpacing: 0.2,
     height: 1.3,
   );
 

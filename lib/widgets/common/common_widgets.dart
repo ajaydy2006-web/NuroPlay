@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 
-/// Primary accent button with vibrant gradient background
+/// Primary accent button with vibrant clay purple gradient
 typedef NuroPlayButton = MindRushButton;
 
 class MindRushButton extends StatelessWidget {
@@ -35,28 +35,28 @@ class MindRushButton extends StatelessWidget {
         child: OutlinedButton(
           onPressed: isLoading ? null : onPressed,
           style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: AppColors.primaryAccent, width: 1.5),
+            side: const BorderSide(color: AppColors.primaryAccent, width: 2),
             padding: padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           ),
           child: _buildChild(AppColors.primaryAccent),
         ),
       );
     }
 
-    final activeGradient = gradient ?? AppColors.vibrantMixGradient;
+    final activeGradient = gradient ?? AppColors.accentGradient;
 
     return SizedBox(
       width: width,
       child: Container(
         decoration: BoxDecoration(
           gradient: activeGradient,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
               color: AppColors.primaryAccent.withOpacity(0.35),
-              blurRadius: 14,
-              offset: const Offset(0, 4),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -66,9 +66,9 @@ class MindRushButton extends StatelessWidget {
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
             padding: padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           ),
-          child: _buildChild(AppColors.primaryBg),
+          child: _buildChild(Colors.white),
         ),
       ),
     );
@@ -99,13 +99,14 @@ class MindRushButton extends StatelessWidget {
   }
 }
 
-/// Game card widget with border and optional gradient
+/// Claymorphic Game Card with soft 3D shadow and rounded corners
 class GameCard extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;
   final EdgeInsets? padding;
   final LinearGradient? gradient;
   final Color? borderColor;
+  final double borderRadius;
 
   const GameCard({
     super.key,
@@ -114,6 +115,7 @@ class GameCard extends StatelessWidget {
     this.padding,
     this.gradient,
     this.borderColor,
+    this.borderRadius = 24,
   });
 
   @override
@@ -121,20 +123,25 @@ class GameCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: padding ?? const EdgeInsets.all(16),
+        padding: padding ?? const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: gradient == null ? AppColors.cardBg : null,
+          color: gradient == null ? Colors.white : null,
           gradient: gradient,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(borderRadius),
           border: Border.all(
-            color: borderColor ?? AppColors.divider,
-            width: 1,
+            color: borderColor ?? Colors.white,
+            width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.25),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+              color: const Color(0x1A7E52FF),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+            const BoxShadow(
+              color: Colors.white,
+              blurRadius: 6,
+              offset: Offset(-2, -2),
             ),
           ],
         ),
@@ -144,7 +151,7 @@ class GameCard extends StatelessWidget {
   }
 }
 
-/// Stat chip showing label + value
+/// Stat chip showing label + value in clay style
 class StatChip extends StatelessWidget {
   final String label;
   final String value;
@@ -161,29 +168,30 @@ class StatChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.elevatedCard,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.divider, width: 0.5),
-      ),
-      child: Column(
-        children: [
-          if (icon != null)
-            Icon(icon, size: 16, color: valueColor ?? AppColors.primaryAccent),
-          if (icon != null) const SizedBox(height: 4),
-          Text(
-            value,
-            style: AppTypography.monoBody.copyWith(
-              color: valueColor ?? AppColors.primaryAccent,
-              fontWeight: FontWeight.w700,
-            ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (icon != null)
+          Icon(icon, size: 22, color: valueColor ?? AppColors.primaryAccent),
+        if (icon != null) const SizedBox(height: 4),
+        Text(
+          value,
+          style: AppTypography.heading3.copyWith(
+            color: AppColors.primaryText,
+            fontSize: 18,
+            fontWeight: FontWeight.w900,
           ),
-          const SizedBox(height: 2),
-          Text(label, style: AppTypography.bodySmall),
-        ],
-      ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: AppTypography.bodySmall.copyWith(
+            color: AppColors.secondaryText,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -208,13 +216,23 @@ class SectionHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: AppTypography.heading4),
+          Text(
+            title,
+            style: AppTypography.heading3.copyWith(
+              color: AppColors.primaryText,
+              fontWeight: FontWeight.w900,
+              fontSize: 18,
+            ),
+          ),
           if (actionLabel != null)
-            TextButton(
-              onPressed: onAction,
+            GestureDetector(
+              onTap: onAction,
               child: Text(
                 actionLabel!,
-                style: AppTypography.labelSmall.copyWith(color: AppColors.primaryAccent),
+                style: AppTypography.labelMedium.copyWith(
+                  color: AppColors.primaryAccent,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
         ],
@@ -242,24 +260,32 @@ class AvatarCircle extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.elevatedCard,
-        border: Border.all(
-          color: borderColor ?? AppColors.primaryAccent.withOpacity(0.5),
-          width: 2,
-        ),
+        color: const Color(0xFFF0E8FF),
+        borderRadius: BorderRadius.circular(size * 0.35),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x187E52FF),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+          BoxShadow(
+            color: Colors.white,
+            blurRadius: 4,
+            offset: Offset(-1, -1),
+          ),
+        ],
       ),
       child: Center(
         child: Text(
           emoji,
-          style: TextStyle(fontSize: size * 0.5),
+          style: TextStyle(fontSize: size * 0.52),
         ),
       ),
     );
   }
 }
 
-/// Animated progress bar
+/// Animated progress bar with clay track & vivid purple fill
 class AnimatedProgressBar extends StatelessWidget {
   final double progress;
   final Color? color;
@@ -269,7 +295,7 @@ class AnimatedProgressBar extends StatelessWidget {
     super.key,
     required this.progress,
     this.color,
-    this.height = 6,
+    this.height = 10,
   });
 
   @override
@@ -277,7 +303,7 @@ class AnimatedProgressBar extends StatelessWidget {
     return Container(
       height: height,
       decoration: BoxDecoration(
-        color: AppColors.divider,
+        color: const Color(0xFFEFEAF9),
         borderRadius: BorderRadius.circular(height / 2),
       ),
       child: FractionallySizedBox(
@@ -285,13 +311,15 @@ class AnimatedProgressBar extends StatelessWidget {
         widthFactor: progress.clamp(0.0, 1.0),
         child: Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                color ?? AppColors.primaryAccent,
-                (color ?? AppColors.primaryAccent).withOpacity(0.7),
-              ],
-            ),
+            color: color ?? AppColors.primaryAccent,
             borderRadius: BorderRadius.circular(height / 2),
+            boxShadow: [
+              BoxShadow(
+                color: (color ?? AppColors.primaryAccent).withOpacity(0.35),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
         ),
       ),
@@ -299,7 +327,7 @@ class AnimatedProgressBar extends StatelessWidget {
   }
 }
 
-/// Electrifying Black & Cerulean Blue background with a luminous "Neon Rise" in the middle (Matiks style)
+/// 3D Claymorphic Pastel Background with floating soft spheres (as in reference UI)
 typedef NuroPlayBackground = NeonRiseBackground;
 
 class NeonRiseBackground extends StatelessWidget {
@@ -317,81 +345,108 @@ class NeonRiseBackground extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Base pure obsidian black background
+        // Base pastel lilac canvas
         Container(
           color: AppColors.primaryBg,
         ),
 
-        // ─── NEON RISE IN THE MIDDLE ───
-        // 1. Massive Center Cerulean Core Glow
-        Center(
+        // 1. Top-Left 3D Soft Yellow Clay Sphere
+        Positioned(
+          top: -30,
+          left: -40,
           child: Container(
-            width: 360,
-            height: 360,
+            width: 140,
+            height: 140,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: RadialGradient(
-                center: Alignment.center,
+              gradient: const RadialGradient(
+                center: Alignment(-0.35, -0.35),
                 radius: 0.85,
                 colors: [
-                  AppColors.primaryAccent.withOpacity(0.24), // Vibrant Cerulean Rise
-                  AppColors.secondaryAccent.withOpacity(0.12), // Cyan aura
-                  Colors.transparent,
+                  Color(0xFFFFEA8D),
+                  Color(0xFFFFD555),
+                  Color(0xFFF7BD22),
                 ],
-                stops: const [0.0, 0.45, 1.0],
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFFFD555).withOpacity(0.4),
+                  blurRadius: 30,
+                  offset: const Offset(8, 12),
+                ),
+              ],
             ),
           ),
         ),
 
-        // 2. Middle Electric Horizon Rise (horizontal neon beam / laser glow)
-        if (showMiddleBeam)
-          Center(
-            child: Container(
-              height: 120,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment.center,
-                  radius: 0.9,
-                  colors: [
-                    AppColors.secondaryAccent.withOpacity(0.16),
-                    AppColors.primaryAccent.withOpacity(0.06),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 0.5, 1.0],
-                ),
+        // 2. Top-Right 3D Soft Warm Pink Clay Sphere
+        Positioned(
+          top: 60,
+          right: -50,
+          child: Container(
+            width: 160,
+            height: 160,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const RadialGradient(
+                center: Alignment(-0.3, -0.3),
+                radius: 0.85,
+                colors: [
+                  Color(0xFFFFC0D0),
+                  Color(0xFFFFA5BA),
+                  Color(0xFFFF7A97),
+                ],
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFFF8DA1).withOpacity(0.35),
+                  blurRadius: 32,
+                  offset: const Offset(-8, 14),
+                ),
+              ],
             ),
           ),
+        ),
 
-        // 3. Central Neon Ring Aura
+        // 3. Bottom-Left 3D Periwinkle Blue Sphere
+        Positioned(
+          bottom: 120,
+          left: -60,
+          child: Container(
+            width: 150,
+            height: 150,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const RadialGradient(
+                center: Alignment(-0.3, -0.3),
+                radius: 0.85,
+                colors: [
+                  Color(0xFFB3D0FF),
+                  Color(0xFF88AEFF),
+                  Color(0xFF5A8EFF),
+                ],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF74A8FF).withOpacity(0.35),
+                  blurRadius: 30,
+                  offset: const Offset(10, 10),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // 4. Subtle ambient glow in center
         Center(
           child: Container(
-            width: 220,
-            height: 220,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.primaryAccent.withOpacity(0.10),
-                width: 1.5,
-              ),
-            ),
-          ),
-        ),
-
-        // 4. Subtle Top-Right Ambient Cerulean Cyan Orb
-        Positioned(
-          top: -100,
-          right: -80,
-          child: Container(
-            width: 280,
-            height: 280,
+            width: 400,
+            height: 400,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  AppColors.secondaryAccent.withOpacity(0.12),
+                  Colors.white.withOpacity(0.35),
                   Colors.transparent,
                 ],
               ),
@@ -399,26 +454,7 @@ class NeonRiseBackground extends StatelessWidget {
           ),
         ),
 
-        // 5. Subtle Bottom-Left Deep Midnight Cerulean Orb
-        Positioned(
-          bottom: -120,
-          left: -80,
-          child: Container(
-            width: 300,
-            height: 300,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  AppColors.primaryAccent.withOpacity(0.10),
-                  Colors.transparent,
-                ],
-              ),
-            ),
-          ),
-        ),
-
-        // Foreground application content
+        // Foreground content
         Positioned.fill(child: child),
       ],
     );

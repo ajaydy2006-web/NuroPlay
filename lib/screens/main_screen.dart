@@ -26,32 +26,37 @@ class MainScreen extends StatelessWidget {
 
         return Scaffold(
           backgroundColor: AppColors.primaryBg,
+          extendBody: true,
           body: IndexedStack(
             index: currentIndex,
             children: screens,
           ),
-          bottomNavigationBar: Container(
-            decoration: BoxDecoration(
-              color: AppColors.secondaryBg,
-              border: const Border(
-                top: BorderSide(color: AppColors.divider, width: 1),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 16,
-                  offset: const Offset(0, -4),
+          bottomNavigationBar: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 0, 18, 14),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(34),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0x187E52FF),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                    const BoxShadow(
+                      color: Colors.white,
+                      blurRadius: 6,
+                      offset: Offset(-1, -1),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _NavBarItem(
-                      icon: Icons.dashboard_rounded,
+                      icon: Icons.home_rounded,
                       label: 'Home',
                       isSelected: currentIndex == 0,
                       onTap: () => provider.setBottomNavIndex(0),
@@ -63,13 +68,13 @@ class MainScreen extends StatelessWidget {
                       onTap: () => provider.setBottomNavIndex(1),
                     ),
                     _NavBarItem(
-                      icon: Icons.leaderboard_rounded,
+                      icon: Icons.bar_chart_rounded,
                       label: 'Ranks',
                       isSelected: currentIndex == 2,
                       onTap: () => provider.setBottomNavIndex(2),
                     ),
                     _NavBarItem(
-                      icon: Icons.person_rounded,
+                      icon: Icons.person_outline_rounded,
                       label: 'Profile',
                       isSelected: currentIndex == 3,
                       onTap: () => provider.setBottomNavIndex(3),
@@ -105,12 +110,14 @@ class _NavBarItem extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: isSelected
+            ? const EdgeInsets.symmetric(horizontal: 18, vertical: 8)
+            : const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primaryAccent.withOpacity(0.12)
+              ? const Color(0xFFEADBFF)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(22),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -120,12 +127,12 @@ class _NavBarItem extends StatelessWidget {
               size: 24,
               color: isSelected ? AppColors.primaryAccent : AppColors.secondaryText,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
               label,
               style: AppTypography.labelSmall.copyWith(
                 color: isSelected ? AppColors.primaryAccent : AppColors.secondaryText,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                 fontSize: 11,
               ),
             ),
