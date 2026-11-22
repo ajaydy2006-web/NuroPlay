@@ -215,197 +215,252 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       return matchesCategory && matchesQuery;
     }).toList();
 
-    return Scaffold(
-      backgroundColor: AppColors.primaryBg,
-      body: NuroPlayBackground(
-        child: SafeArea(
-          child: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-            // Top App Bar
-            SliverAppBar(
-              backgroundColor: AppColors.primaryBg,
-              elevation: 0,
-              pinned: true,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primaryText),
-                onPressed: () => Navigator.pop(context),
-              ),
-              title: Text('Real-World Arcade', style: AppTypography.heading2),
-              centerTitle: true,
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.sports_esports_rounded, color: AppColors.primaryAccent),
-                  onPressed: () {},
-                ),
-              ],
-            ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isTabletOrDesktop = constraints.maxWidth >= 650;
+        final isLargeDesktop = constraints.maxWidth >= 1050;
 
-            // Hero Banner
-            SliverToBoxAdapter(
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.primaryAccent.withOpacity(0.3)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primaryAccent.withOpacity(0.08),
-                      blurRadius: 20,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryAccent.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppColors.primaryAccent.withOpacity(0.4)),
+        return Scaffold(
+          backgroundColor: AppColors.primaryBg,
+          body: NuroPlayBackground(
+            child: SafeArea(
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  // Top App Bar
+                  SliverAppBar(
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                    pinned: true,
+                    leading: Container(
+                      margin: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.06),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF2C2416), size: 18),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ),
+                    title: Text(
+                      'Real-World Arcade',
+                      style: AppTypography.heading2.copyWith(color: const Color(0xFF2C2416), fontWeight: FontWeight.bold),
+                    ),
+                    centerTitle: true,
+                    actions: [
+                      Container(
+                        margin: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.06),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.sports_esports_rounded, color: Color(0xFF7E52FF), size: 20),
+                          onPressed: () {},
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Hero Banner in Claymorphic Pastel Lilac
+                  SliverToBoxAdapter(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF8B5CF6), Color(0xFF7E52FF), Color(0xFF6D38EB)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF7E52FF).withOpacity(0.35),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: [
-                              const Icon(Icons.auto_awesome_rounded, size: 14, color: AppColors.primaryAccent),
-                              const SizedBox(width: 6),
-                              Text(
-                                '10 Playable Games',
-                                style: AppTypography.labelSmall.copyWith(
-                                  color: AppColors.primaryAccent,
-                                  fontWeight: FontWeight.bold,
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.22),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.auto_awesome_rounded, size: 14, color: Colors.white),
+                                    SizedBox(width: 6),
+                                    Text(
+                                      '10 Playable Games',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Spacer(),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFFD54F),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Text(
+                                  'Physics & 2P Duels',
+                                  style: TextStyle(
+                                    color: Color(0xFF3E2723),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.secondaryAccent.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppColors.secondaryAccent.withOpacity(0.4)),
-                          ),
-                          child: Text(
-                            'Physics & 2P Duels',
-                            style: AppTypography.labelSmall.copyWith(
-                              color: AppColors.secondaryAccent,
+                          const SizedBox(height: 14),
+                          const Text(
+                            'Tabletop & Physical Classics',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Tabletop & Physical Classics',
-                      style: AppTypography.heading3.copyWith(color: AppColors.primaryText),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Experience tactile physics, pass & play local duels, and smart AI opponents inspired by classroom games and tabletop legends.',
-                      style: AppTypography.bodySmall.copyWith(color: AppColors.secondaryText),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Search Bar
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                child: TextField(
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
-                  onChanged: (q) => setState(() => _searchQuery = q),
-                  decoration: InputDecoration(
-                    hintText: 'Search games, mechanics, or categories...',
-                    hintStyle: const TextStyle(color: AppColors.secondaryText, fontSize: 13),
-                    prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primaryAccent, size: 20),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear_rounded, color: AppColors.secondaryText, size: 18),
-                            onPressed: () => setState(() => _searchQuery = ''),
-                          )
-                        : null,
-                    filled: true,
-                    fillColor: AppColors.cardBg,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: AppColors.divider),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: AppColors.divider),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: AppColors.primaryAccent),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Tactile physics, tournament wood surfaces, pass & play local duels, and smart AI opponents inspired by timeless real-world games.',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.9),
+                              fontSize: 13,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
+
+                  // Search Bar
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF7E52FF).withOpacity(0.06),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: TextField(
+                          style: const TextStyle(color: Color(0xFF2C2416), fontSize: 14),
+                          onChanged: (q) => setState(() => _searchQuery = q),
+                          decoration: InputDecoration(
+                            hintText: 'Search games, mechanics, or categories...',
+                            hintStyle: const TextStyle(color: Color(0xFF9E8DB3), fontSize: 13),
+                            prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF7E52FF), size: 20),
+                            suffixIcon: _searchQuery.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear_rounded, color: Color(0xFF9E8DB3), size: 18),
+                                    onPressed: () => setState(() => _searchQuery = ''),
+                                  )
+                                : null,
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Category Filter Tabs
+                  SliverToBoxAdapter(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      physics: const BouncingScrollPhysics(),
+                      child: Row(
+                        children: [
+                          _buildCategoryChip('all', 'All Games (10)', Icons.apps_rounded),
+                          const SizedBox(width: 8),
+                          _buildCategoryChip('multiplayer', '👥 2P Multiplayer', Icons.people_alt_rounded),
+                          const SizedBox(width: 8),
+                          _buildCategoryChip('classroom', '🏫 Classroom', Icons.school_rounded),
+                          const SizedBox(width: 8),
+                          _buildCategoryChip('tabletop', '🎯 Tabletop', Icons.table_restaurant_rounded),
+                          const SizedBox(width: 8),
+                          _buildCategoryChip('duels', '⚔️ Quick Duels', Icons.flash_on_rounded),
+                          const SizedBox(width: 8),
+                          _buildCategoryChip('reaction', '⚡ Reaction', Icons.bolt_rounded),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Games Grid / List (Fully Responsive)
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    sliver: isTabletOrDesktop
+                        ? SliverGrid(
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: isLargeDesktop ? 3 : 2,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                              childAspectRatio: 1.45,
+                            ),
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) => _buildGameCard(filteredGames[index]),
+                              childCount: filteredGames.length,
+                            ),
+                          )
+                        : SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) => _buildGameCard(filteredGames[index]),
+                              childCount: filteredGames.length,
+                            ),
+                          ),
+                  ),
+
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: 36),
+                  ),
+                ],
               ),
             ),
-
-            // Category Filter Tabs
-            SliverToBoxAdapter(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                physics: const BouncingScrollPhysics(),
-                child: Row(
-                  children: [
-                    _buildCategoryChip('all', 'All Games (10)', Icons.apps_rounded),
-                    const SizedBox(width: 8),
-                    _buildCategoryChip('multiplayer', '👥 2P Multiplayer', Icons.people_alt_rounded),
-                    const SizedBox(width: 8),
-                    _buildCategoryChip('classroom', '🏫 Classroom', Icons.school_rounded),
-                    const SizedBox(width: 8),
-                    _buildCategoryChip('tabletop', '🎯 Tabletop', Icons.table_restaurant_rounded),
-                    const SizedBox(width: 8),
-                    _buildCategoryChip('duels', '⚔️ Quick Duels', Icons.flash_on_rounded),
-                    const SizedBox(width: 8),
-                    _buildCategoryChip('reaction', '⚡ Reaction', Icons.bolt_rounded),
-                  ],
-                ),
-              ),
-            ),
-
-            // Games Grid / List
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final game = filteredGames[index];
-                    return _buildGameCard(game);
-                  },
-                  childCount: filteredGames.length,
-                ),
-              ),
-            ),
-
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 32),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
+          ),
+        );
+      },
+    );
+  }
 
   Widget _buildCategoryChip(String id, String label, IconData icon) {
     final isSelected = _selectedCategory == id;
@@ -413,35 +468,30 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
       onTap: () => setState(() => _selectedCategory = id),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryAccent : AppColors.cardBg,
+          color: isSelected ? const Color(0xFF7E52FF) : Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppColors.primaryAccent : AppColors.divider,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primaryAccent.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
+          boxShadow: [
+            BoxShadow(
+              color: (isSelected ? const Color(0xFF7E52FF) : Colors.black).withOpacity(isSelected ? 0.3 : 0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Row(
           children: [
             Icon(
               icon,
               size: 16,
-              color: isSelected ? AppColors.primaryBg : AppColors.secondaryText,
+              color: isSelected ? Colors.white : const Color(0xFF6B5E7A),
             ),
             const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? AppColors.primaryBg : AppColors.primaryText,
+                color: isSelected ? Colors.white : const Color(0xFF2C2416),
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
               ),
@@ -458,22 +508,26 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: AppColors.cardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.divider),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: const Color(0xFF7E52FF).withOpacity(0.08),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: Colors.white.withOpacity(0.9),
+            blurRadius: 2,
+            offset: const Offset(0, -1),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(22),
         child: InkWell(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(22),
           onTap: () => _showGameOptionsModal(game),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -490,14 +544,13 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            game.accentColor.withOpacity(0.25),
-                            game.accentColor.withOpacity(0.08),
+                            game.accentColor.withOpacity(0.2),
+                            game.accentColor.withOpacity(0.05),
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: game.accentColor.withOpacity(0.4)),
                       ),
                       child: Icon(game.icon, color: game.accentColor, size: 26),
                     ),
@@ -511,26 +564,25 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                               Expanded(
                                 child: Text(
                                   game.title,
-                                  style: AppTypography.heading3.copyWith(fontSize: 18),
+                                  style: AppTypography.heading3.copyWith(fontSize: 17, color: const Color(0xFF2C2416), fontWeight: FontWeight.bold),
                                 ),
                               ),
                               if (personalBest > 0)
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                   decoration: BoxDecoration(
-                                    color: AppColors.warning.withOpacity(0.15),
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(color: AppColors.warning.withOpacity(0.4)),
+                                    color: const Color(0xFFFEF3C7),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(Icons.emoji_events_rounded, size: 12, color: AppColors.warning),
+                                      const Icon(Icons.emoji_events_rounded, size: 12, color: Color(0xFFD97706)),
                                       const SizedBox(width: 4),
                                       Text(
                                         'Best: $personalBest',
                                         style: const TextStyle(
-                                          color: AppColors.warning,
+                                          color: Color(0xFF92400E),
                                           fontSize: 11,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -546,28 +598,27 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                               Text(
                                 game.categoryName,
                                 style: AppTypography.captionSmall.copyWith(
-                                  color: game.accentColor,
+                                  color: const Color(0xFF7E52FF),
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               if (game.hasMultiplayer) ...[
                                 const SizedBox(width: 8),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: AppColors.secondaryAccent.withOpacity(0.15),
+                                    color: const Color(0xFFEDE9FE),
                                     borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(color: AppColors.secondaryAccent.withOpacity(0.4)),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(Icons.people_alt_rounded, size: 11, color: AppColors.secondaryAccent),
+                                      const Icon(Icons.people_alt_rounded, size: 11, color: Color(0xFF7E52FF)),
                                       const SizedBox(width: 4),
                                       Text(
                                         game.multiplayerMode,
                                         style: const TextStyle(
-                                          color: AppColors.secondaryAccent,
+                                          color: Color(0xFF7E52FF),
                                           fontSize: 10,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -582,7 +633,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.info_outline_rounded, color: AppColors.secondaryText, size: 20),
+                      icon: const Icon(Icons.info_outline_rounded, color: Color(0xFF9E8DB3), size: 20),
                       onPressed: () => _showGameRules(game),
                     ),
                   ],
@@ -590,7 +641,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                 const SizedBox(height: 10),
                 Text(
                   game.subtitle,
-                  style: AppTypography.bodySmall.copyWith(color: AppColors.secondaryText, height: 1.4),
+                  style: AppTypography.bodySmall.copyWith(color: const Color(0xFF6B5E7A), height: 1.4),
                 ),
                 const SizedBox(height: 12),
                 // Tags
@@ -599,18 +650,17 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                   runSpacing: 6,
                   children: game.tags.map((tag) {
                     return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryBg,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: AppColors.divider),
+                        color: const Color(0xFFF3F0FD),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         tag,
                         style: const TextStyle(
-                          color: AppColors.primaryText,
+                          color: Color(0xFF5A449B),
                           fontSize: 11,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     );
@@ -625,20 +675,20 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 10),
-                          side: BorderSide(color: AppColors.primaryAccent.withOpacity(0.6)),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          backgroundColor: AppColors.primaryAccent.withOpacity(0.08),
+                          side: const BorderSide(color: Color(0xFFD6C8FF)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          backgroundColor: const Color(0xFFF9F7FF),
                         ),
                         onPressed: () => _showGameOptionsModal(game),
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.tune_rounded, size: 16, color: AppColors.primaryAccent),
+                            Icon(Icons.tune_rounded, size: 16, color: Color(0xFF7E52FF)),
                             SizedBox(width: 6),
                             Text(
-                              'Game Options',
+                              'Options',
                               style: TextStyle(
-                                color: AppColors.primaryAccent,
+                                color: Color(0xFF7E52FF),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
                               ),
@@ -654,9 +704,9 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 10),
-                            backgroundColor: AppColors.secondaryAccent,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            elevation: 3,
+                            backgroundColor: const Color(0xFF7E52FF),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            elevation: 2,
                           ),
                           onPressed: () => Navigator.pushNamed(context, game.route),
                           child: const Row(
@@ -681,8 +731,9 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 10),
-                            backgroundColor: game.accentColor,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            backgroundColor: const Color(0xFF7E52FF),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            elevation: 2,
                           ),
                           onPressed: () => Navigator.pushNamed(context, game.route),
                           child: const Row(
@@ -711,7 +762,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
   void _showGameOptionsModal(RealWorldGameInfo game) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.cardBg,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -731,7 +782,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                       height: 4,
                       margin: const EdgeInsets.only(bottom: 16),
                       decoration: BoxDecoration(
-                        color: AppColors.divider,
+                        color: const Color(0xFFDDD6FE),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -742,22 +793,21 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: game.accentColor.withOpacity(0.18),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: game.accentColor.withOpacity(0.4)),
+                          color: const Color(0xFFEDE9FE),
+                          borderRadius: BorderRadius.circular(14),
                         ),
-                        child: Icon(game.icon, color: game.accentColor, size: 28),
+                        child: Icon(game.icon, color: const Color(0xFF7E52FF), size: 28),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(game.title, style: AppTypography.heading3.copyWith(fontSize: 19)),
+                            Text(game.title, style: AppTypography.heading3.copyWith(fontSize: 19, color: const Color(0xFF2C2416), fontWeight: FontWeight.bold)),
                             const SizedBox(height: 2),
                             Text(
                               game.subtitle,
-                              style: AppTypography.captionSmall.copyWith(color: AppColors.secondaryText),
+                              style: AppTypography.captionSmall.copyWith(color: const Color(0xFF6B5E7A)),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -770,7 +820,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                   Text(
                     'SELECT GAME MODE',
                     style: AppTypography.labelSmall.copyWith(
-                      color: AppColors.secondaryText,
+                      color: const Color(0xFF7E52FF),
                       letterSpacing: 1.2,
                       fontWeight: FontWeight.bold,
                     ),
@@ -782,7 +832,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                     title: 'Solo Practice / vs AI',
                     subtitle: 'Play against smart bot algorithms or practice physics aiming',
                     icon: Icons.smart_toy_rounded,
-                    accent: game.accentColor,
+                    accent: const Color(0xFF7E52FF),
                     badge: 'SOLO / AI',
                     onTap: () {
                       Navigator.pop(ctx);
@@ -797,7 +847,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                       title: '2-Player Multiplayer (${game.multiplayerMode})',
                       subtitle: game.multiplayerDetails,
                       icon: Icons.people_alt_rounded,
-                      accent: AppColors.secondaryAccent,
+                      accent: const Color(0xFF7E52FF),
                       badge: 'LOCAL 2P',
                       isHighlighted: true,
                       onTap: () {
@@ -812,7 +862,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                     title: 'Online 1v1 Room (Room Code)',
                     subtitle: 'Create a private multiplayer room or join with a 4-digit PIN',
                     icon: Icons.wifi_tethering_rounded,
-                    accent: const Color(0xFF00F5A0),
+                    accent: const Color(0xFF10B981),
                     badge: 'ONLINE 1v1',
                     onTap: () {
                       Navigator.pop(ctx);
@@ -827,7 +877,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        side: const BorderSide(color: AppColors.divider),
+                        side: const BorderSide(color: Color(0xFFDDD6FE)),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: () {
@@ -837,11 +887,11 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.menu_book_rounded, size: 16, color: AppColors.primaryText),
+                          Icon(Icons.menu_book_rounded, size: 16, color: Color(0xFF7E52FF)),
                           SizedBox(width: 8),
                           Text(
                             'View Rules & How to Play',
-                            style: TextStyle(color: AppColors.primaryText, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: Color(0xFF2C2416), fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -868,18 +918,25 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: isHighlighted ? accent.withOpacity(0.12) : AppColors.primaryBg,
-        borderRadius: BorderRadius.circular(14),
+        color: isHighlighted ? const Color(0xFFF5F3FF) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isHighlighted ? accent.withOpacity(0.5) : AppColors.divider,
+          color: isHighlighted ? const Color(0xFFC4B5FD) : const Color(0xFFE2E8F0),
           width: isHighlighted ? 1.5 : 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         child: InkWell(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -888,7 +945,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: accent.withOpacity(0.2),
+                    color: accent.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(icon, color: accent, size: 22),
@@ -904,7 +961,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                             child: Text(
                               title,
                               style: TextStyle(
-                                color: Colors.white,
+                                color: const Color(0xFF2C2416),
                                 fontWeight: isHighlighted ? FontWeight.bold : FontWeight.w600,
                                 fontSize: 13,
                               ),
@@ -913,8 +970,8 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: accent.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(4),
+                              color: accent.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               badge,
@@ -931,7 +988,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                       Text(
                         subtitle,
                         style: const TextStyle(
-                          color: AppColors.secondaryText,
+                          color: Color(0xFF6B5E7A),
                           fontSize: 11,
                         ),
                       ),
@@ -939,7 +996,7 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.arrow_forward_ios_rounded, color: AppColors.secondaryText, size: 14),
+                const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFF9E8DB3), size: 14),
               ],
             ),
           ),
@@ -952,23 +1009,23 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.cardBg,
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: game.accentColor.withOpacity(0.15),
+                color: const Color(0xFFEDE9FE),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(game.icon, color: game.accentColor, size: 22),
+              child: Icon(game.icon, color: const Color(0xFF7E52FF), size: 22),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
                 game.title,
-                style: AppTypography.heading3,
+                style: AppTypography.heading3.copyWith(color: const Color(0xFF2C2416), fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -979,30 +1036,30 @@ class _RealWorldArcadeScreenState extends State<RealWorldArcadeScreen> {
           children: [
             Text(
               'How to Play',
-              style: AppTypography.labelLarge.copyWith(color: AppColors.primaryAccent),
+              style: AppTypography.labelLarge.copyWith(color: const Color(0xFF7E52FF), fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               game.rules,
-              style: AppTypography.bodySmall.copyWith(color: AppColors.primaryText, height: 1.5),
+              style: AppTypography.bodySmall.copyWith(color: const Color(0xFF2C2416), height: 1.5),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Close', style: TextStyle(color: AppColors.secondaryText)),
+            child: const Text('Close', style: TextStyle(color: Color(0xFF6B5E7A))),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: game.accentColor,
+              backgroundColor: const Color(0xFF7E52FF),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () {
               Navigator.pop(ctx);
               Navigator.pushNamed(context, game.route);
             },
-            child: const Text('Play Now', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            child: const Text('Play Now', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../widgets/common/common_widgets.dart';
 import '../../services/storage_service.dart';
+import 'realistic_game_components.dart';
 
 enum PlaneModel {
   dart('Dart', 'High speed, piercing aerodynamics', 1.2, 0.85),
@@ -234,9 +235,9 @@ class _PaperPlaneGameState extends State<PaperPlaneGame>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
-      body: NeonRiseBackground(
-        showMiddleBeam: true,
+      backgroundColor: const Color(0xFF2C1E14),
+      body: RealisticWoodTableSurface(
+        isDarkWood: false,
         child: SafeArea(
           child: Column(
             children: [
@@ -245,19 +246,32 @@ class _PaperPlaneGameState extends State<PaperPlaneGame>
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 20),
-                      onPressed: () => Navigator.pop(context),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.18),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF2C2416), size: 18),
+                        onPressed: () => Navigator.pop(context),
+                      ),
                     ),
                     Expanded(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('Paper Plane Challenge', style: AppTypography.heading3.copyWith(fontSize: 16)),
+                          Text('Paper Plane Challenge', style: AppTypography.heading3.copyWith(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
                           Text(
                             'Tries: $_attemptsLeft • Score: $_totalScore pts',
                             style: AppTypography.captionSmall.copyWith(
-                              color: AppColors.primaryAccent,
+                              color: const Color(0xFFFFD54F),
                               fontWeight: FontWeight.bold,
                               fontSize: 11,
                             ),
@@ -265,19 +279,46 @@ class _PaperPlaneGameState extends State<PaperPlaneGame>
                         ],
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.info_outline_rounded, color: AppColors.textSecondary, size: 20),
-                      onPressed: _showInstructions,
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.18),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.info_outline_rounded, color: Color(0xFF5D4037), size: 18),
+                        onPressed: _showInstructions,
+                      ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.refresh_rounded, color: AppColors.primaryAccent, size: 20),
-                      onPressed: () {
-                        setState(() {
-                          _attemptsLeft = 5;
-                          _totalScore = 0;
-                          _resetPlane();
-                        });
-                      },
+                    const SizedBox(width: 6),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.18),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.refresh_rounded, color: Color(0xFF7E52FF), size: 18),
+                        onPressed: () {
+                          setState(() {
+                            _attemptsLeft = 5;
+                            _totalScore = 0;
+                            _resetPlane();
+                          });
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -291,11 +332,17 @@ class _PaperPlaneGameState extends State<PaperPlaneGame>
                     // Wind Indicator
                     Flexible(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: AppColors.surfaceDark,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.surfaceBorder),
+                          color: Colors.white.withOpacity(0.92),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.15),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -303,14 +350,14 @@ class _PaperPlaneGameState extends State<PaperPlaneGame>
                             Icon(
                               Icons.air_rounded,
                               size: 16,
-                              color: _windSpeed >= 0 ? AppColors.primaryAccent : AppColors.error,
+                              color: _windSpeed >= 0 ? const Color(0xFF22C55E) : const Color(0xFFEF4444),
                             ),
                             const SizedBox(width: 6),
                             Flexible(
                               child: Text(
                                 '${_windSpeed.abs().toStringAsFixed(1)}m/s ${_windSpeed >= 0 ? "Tailwind" : "Headwind"}',
                                 style: AppTypography.captionSmall.copyWith(
-                                  color: Colors.white,
+                                  color: const Color(0xFF2C2416),
                                   fontWeight: FontWeight.bold,
                                   fontSize: 11,
                                 ),
@@ -324,21 +371,27 @@ class _PaperPlaneGameState extends State<PaperPlaneGame>
                     const SizedBox(width: 8),
                     // Personal Best
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceDark,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.surfaceBorder),
+                        color: Colors.white.withOpacity(0.92),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.emoji_events_rounded, size: 16, color: AppColors.warning),
+                          const Icon(Icons.emoji_events_rounded, size: 16, color: Color(0xFFFFB800)),
                           const SizedBox(width: 6),
                           Text(
                             'Best: ${_bestDistance.toStringAsFixed(1)}m',
                             style: AppTypography.captionSmall.copyWith(
-                              color: AppColors.warning,
+                              color: const Color(0xFF2C2416),
                               fontWeight: FontWeight.bold,
                               fontSize: 11,
                             ),
@@ -362,19 +415,23 @@ class _PaperPlaneGameState extends State<PaperPlaneGame>
                         onTap: () => setState(() => _selectedModel = model),
                         child: Container(
                           margin: const EdgeInsets.symmetric(horizontal: 3),
-                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          padding: const EdgeInsets.symmetric(vertical: 8),
                           decoration: BoxDecoration(
-                            color: isSel ? AppColors.primaryAccent : AppColors.surfaceDark,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: isSel ? AppColors.primaryAccent : AppColors.surfaceBorder,
-                            ),
+                            color: isSel ? const Color(0xFF7E52FF) : Colors.white.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: Center(
                             child: Text(
                               model.name,
                               style: TextStyle(
-                                color: isSel ? Colors.black : Colors.white70,
+                                color: isSel ? Colors.white : const Color(0xFF2C2416),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
                               ),
@@ -396,18 +453,23 @@ class _PaperPlaneGameState extends State<PaperPlaneGame>
                 child: Container(
                   margin: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0F172A),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFE0F2FE), Color(0xFFBAE6FD), Color(0xFFF1F5F9)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.surfaceBorder, width: 1.5),
+                    border: Border.all(color: const Color(0xFF5D4037), width: 3),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.5),
-                        blurRadius: 16,
+                        blurRadius: 18,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(19),
+                    borderRadius: BorderRadius.circular(17),
                     child: Stack(
                       children: [
                         // Flight World Painter (Corridor, distance grid, rings, plane, trail)
@@ -430,16 +492,17 @@ class _PaperPlaneGameState extends State<PaperPlaneGame>
                           top: 12,
                           left: 14,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.6),
-                              borderRadius: BorderRadius.circular(6),
+                              color: Colors.black.withOpacity(0.65),
+                              borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               'Dist: ${_planeX.toStringAsFixed(1)}m • Alt: ${_planeY.toStringAsFixed(1)}m • Speed: ${(_vx * 3.6).toStringAsFixed(0)} km/h',
                               style: const TextStyle(
-                                color: AppColors.primaryAccent,
+                                color: Color(0xFFFFD54F),
                                 fontSize: 11,
+                                fontWeight: FontWeight.bold,
                                 fontFamily: 'JetBrains Mono',
                               ),
                             ),
@@ -457,18 +520,24 @@ class _PaperPlaneGameState extends State<PaperPlaneGame>
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: AppColors.surfaceDark,
+                color: Colors.white.withOpacity(0.92),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.surfaceBorder),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.flight_takeoff_rounded, color: AppColors.primaryAccent, size: 20),
+                  const Icon(Icons.flight_takeoff_rounded, color: Color(0xFF7E52FF), size: 20),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       _flightComment,
-                      style: AppTypography.bodySmall.copyWith(color: AppColors.textPrimary),
+                      style: AppTypography.bodySmall.copyWith(color: const Color(0xFF2C2416), fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -579,62 +648,90 @@ class _PaperPlaneFlightPainter extends CustomPainter {
     canvas.save();
     canvas.translate(-viewOffsetX, 0);
 
-    // Floor / Classroom Corridor
-    final floorPaint = Paint()..color = const Color(0xFF1E293B);
-    canvas.drawRect(Rect.fromLTWH(0, floorY, 4000, 40), floorPaint);
+    // Floor: Realistic Polished Hardwood Parquet Corridor Floor
+    final floorRect = Rect.fromLTWH(0, floorY, 4000, 40);
+    final floorPaint = Paint()
+      ..shader = const LinearGradient(
+        colors: [Color(0xFF8B5A2B), Color(0xFF653E1B), Color(0xFF4A2C13)],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ).createShader(floorRect);
+    canvas.drawRect(floorRect, floorPaint);
 
+    // Wood Floor Surface Line & Planks
     final linePaint = Paint()
-      ..color = const Color(0xFF334155)
+      ..color = const Color(0xFFB8860B)
       ..strokeWidth = 2.0;
-    canvas.drawLine(const Offset(0, 0), Offset(4000, 0), linePaint);
+    canvas.drawLine(Offset(0, floorY), Offset(4000, floorY), linePaint);
 
-    // Distance Markers along floor every 10m
+    // Vertical Parquet Seams
+    final seamPaint = Paint()
+      ..color = const Color(0xFF3B200C).withOpacity(0.5)
+      ..strokeWidth = 1.0;
+    for (double sx = 0; sx <= 4000; sx += 45) {
+      canvas.drawLine(Offset(sx, floorY), Offset(sx, floorY + 40), seamPaint);
+    }
+
+    // Distance Markers along floor every 10m with Inlaid Brass Badges
     final textPainter = TextPainter(textDirection: TextDirection.ltr);
     for (int d = 0; d <= 120; d += 10) {
       final markerX = d * 22.0 + 30.0;
       canvas.drawLine(
         Offset(markerX, floorY - 6),
         Offset(markerX, floorY + 6),
-        Paint()..color = AppColors.primaryAccent.withOpacity(0.5)..strokeWidth = 1.5,
+        Paint()..color = const Color(0xFFFFD700)..strokeWidth = 2.0,
       );
 
       textPainter.text = TextSpan(
         text: '${d}m',
-        style: const TextStyle(color: Colors.white54, fontSize: 10, fontFamily: 'JetBrains Mono'),
+        style: const TextStyle(color: Color(0xFFFFE082), fontSize: 10, fontWeight: FontWeight.bold, fontFamily: 'JetBrains Mono'),
       );
       textPainter.layout();
       textPainter.paint(canvas, Offset(markerX - 10, floorY + 8));
     }
 
-    // Target Rings in 3D perspective
+    // Target Rings in 3D perspective with Realistic Brass Lustre
     for (final ring in rings) {
       final ringScreenX = ring.distance * 22.0 + 30.0;
       final ringScreenY = floorY - (ring.height * 40.0);
 
-      final ringPaint = Paint()
-        ..color = ring.isCollected ? AppColors.primaryAccent.withOpacity(0.3) : AppColors.warning
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 3.0;
-
+      // Pole shadow on floor
       canvas.drawOval(
-        Rect.fromCenter(center: Offset(ringScreenX, ringScreenY), width: 14, height: 42),
-        ringPaint,
+        Rect.fromCenter(center: Offset(ringScreenX + 4, floorY + 2), width: 14, height: 6),
+        Paint()..color = Colors.black.withOpacity(0.3),
       );
 
       // Ring pole to floor
       canvas.drawLine(
         Offset(ringScreenX, ringScreenY + 21),
         Offset(ringScreenX, floorY),
-        Paint()..color = const Color(0xFF475569)..strokeWidth = 1.5,
+        Paint()..color = const Color(0xFF78716C)..strokeWidth = 2.0,
+      );
+
+      // 3D Brass Target Ring
+      final ringPaint = Paint()
+        ..shader = LinearGradient(
+          colors: ring.isCollected
+              ? [const Color(0xFF4ADE80), const Color(0xFF16A34A)]
+              : [const Color(0xFFFFE082), const Color(0xFFFFB300), const Color(0xFFB45309)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ).createShader(Rect.fromCenter(center: Offset(ringScreenX, ringScreenY), width: 16, height: 44))
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4.0;
+
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset(ringScreenX, ringScreenY), width: 16, height: 44),
+        ringPaint,
       );
     }
 
-    // Vapor / Smoke Trail
+    // Vapor / Aerodynamic Wind Draft Stream
     if (trail.isNotEmpty) {
       final trailPaint = Paint()
-        ..color = AppColors.primaryAccent.withOpacity(0.4)
+        ..color = const Color(0xFF7E52FF).withOpacity(0.55)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.0;
+        ..strokeWidth = 2.5;
 
       final path = Path();
       for (int i = 0; i < trail.length; i++) {
@@ -648,30 +745,46 @@ class _PaperPlaneFlightPainter extends CustomPainter {
       canvas.drawPath(path, trailPaint);
     }
 
-    // Paper Airplane
+    // Dynamic Cast Ground Shadow below the plane
     final planeScreenX = planeX * 22.0 + 30.0;
     final planeScreenY = floorY - (planeY * 40.0);
+    final shadowScale = (1.0 - (planeY / 8.0).clamp(0.0, 0.7));
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(planeScreenX, floorY - 2),
+        width: 24 * shadowScale,
+        height: 7 * shadowScale,
+      ),
+      Paint()..color = Colors.black.withOpacity(0.35 * shadowScale),
+    );
 
+    // Realistic Folded 3D Paper Airplane
     canvas.save();
     canvas.translate(planeScreenX, planeScreenY);
     canvas.rotate(planeAngle);
 
-    // Origami Paper Plane Polygon
-    final planePath = Path();
-    planePath.moveTo(16, 0); // nose tip
-    planePath.lineTo(-14, -8); // top wing tip
-    planePath.lineTo(-8, 0); // crease
-    planePath.lineTo(-14, 8); // bottom wing tip
-    planePath.close();
+    // Top illuminated wing
+    final topWing = Path();
+    topWing.moveTo(20, 0); // nose tip
+    topWing.lineTo(-14, -10); // top wing tip
+    topWing.lineTo(-7, 0); // crease root
+    topWing.close();
+    canvas.drawPath(topWing, Paint()..color = const Color(0xFFFFFFFF));
 
-    final planeBodyPaint = Paint()..color = Colors.white;
-    canvas.drawPath(planePath, planeBodyPaint);
+    // Bottom shadowed wing
+    final bottomWing = Path();
+    bottomWing.moveTo(20, 0); // nose tip
+    bottomWing.lineTo(-7, 0); // crease root
+    bottomWing.lineTo(-14, 10); // bottom wing tip
+    bottomWing.close();
+    canvas.drawPath(bottomWing, Paint()..color = const Color(0xFFCBD5E1));
 
+    // Center Spine Crease
     final creasePaint = Paint()
-      ..color = const Color(0xFFCBD5E1)
+      ..color = const Color(0xFF94A3B8)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
-    canvas.drawLine(const Offset(16, 0), const Offset(-8, 0), creasePaint);
+      ..strokeWidth = 1.2;
+    canvas.drawLine(const Offset(20, 0), const Offset(-7, 0), creasePaint);
 
     canvas.restore();
     canvas.restore(); // view offset restore
@@ -679,12 +792,12 @@ class _PaperPlaneFlightPainter extends CustomPainter {
     // Slingshot / Launch Drag Indicator
     if (dragStart != null && dragCurrent != null && !isInFlight) {
       final launchPaint = Paint()
-        ..color = AppColors.primaryAccent
-        ..strokeWidth = 2.5
+        ..color = const Color(0xFF7E52FF)
+        ..strokeWidth = 3.0
         ..style = PaintingStyle.stroke;
 
       canvas.drawLine(dragStart!, dragCurrent!, launchPaint);
-      canvas.drawCircle(dragStart!, 6, Paint()..color = AppColors.primaryAccent);
+      canvas.drawCircle(dragStart!, 7, Paint()..color = const Color(0xFF7E52FF));
 
       // Trajectory forecast arrow
       final pull = dragStart! - dragCurrent!;
@@ -693,8 +806,8 @@ class _PaperPlaneFlightPainter extends CustomPainter {
         dragStart!,
         forecast,
         Paint()
-          ..color = AppColors.primaryAccent.withOpacity(0.5)
-          ..strokeWidth = 1.5
+          ..color = const Color(0xFFFFB800)
+          ..strokeWidth = 2.0
           ..strokeCap = StrokeCap.round,
       );
     }

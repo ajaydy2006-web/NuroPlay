@@ -340,6 +340,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             final isSelected = _selectedAnswer == opt;
             final isCorrect = opt == q.correctAnswer;
             return AnswerOptionButton(
+              key: ValueKey('workout_math_${q.id}_$opt'),
               label: '$opt',
               isSelected: isSelected,
               isCorrect: isCorrect,
@@ -555,6 +556,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             final isSelected = _selectedAnswer == opt;
             final isCorrect = opt == p.correctAnswer;
             return AnswerOptionButton(
+              key: ValueKey('workout_logic_${p.id}_$opt'),
               label: '$opt',
               isSelected: isSelected,
               isCorrect: isCorrect,

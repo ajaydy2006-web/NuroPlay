@@ -101,22 +101,18 @@ class HomeScreen extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF8C61FF), Color(0xFF7341FF)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(14),
                 boxShadow: const [
                   BoxShadow(
                     color: Color(0x337E52FF),
-                    blurRadius: 12,
+                    blurRadius: 10,
                     offset: Offset(0, 4),
                   ),
                 ],
               ),
-              child: const Center(
-                child: Text('⚡', style: TextStyle(fontSize: 22, color: Colors.white)),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: Image.asset('assets/images/app_icon.png', fit: BoxFit.cover),
               ),
             ),
             const SizedBox(width: 12),

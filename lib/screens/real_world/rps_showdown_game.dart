@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../widgets/common/common_widgets.dart';
+import 'realistic_game_components.dart';
 
 class RpsShowdownGame extends StatefulWidget {
   const RpsShowdownGame({super.key});
@@ -223,9 +224,9 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primaryBg,
-      body: NeonRiseBackground(
-        showMiddleBeam: true,
+      backgroundColor: const Color(0xFF2C1E14),
+      body: RealisticWoodTableSurface(
+        isDarkWood: false,
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -234,20 +235,34 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
                 // Top App Bar
                 Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primaryText, size: 20),
-                      onPressed: () => Navigator.of(context).pop(),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.18),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF2C2416), size: 18),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
                     ),
                     Expanded(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('Rock Paper Scissors', style: AppTypography.heading3.copyWith(fontSize: 16)),
+                          Text('Rock Paper Scissors', style: AppTypography.heading3.copyWith(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
                           Text(
                             _isTwoPlayer ? '2P Secret Pass & Play' : 'vs AI Opponent',
                             style: AppTypography.captionSmall.copyWith(
-                              color: _isTwoPlayer ? AppColors.secondaryAccent : AppColors.primaryAccent,
+                              color: const Color(0xFFFFD54F),
                               fontWeight: FontWeight.bold,
+                              fontSize: 11,
                             ),
                           ),
                         ],
@@ -256,9 +271,15 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
                     // Mode Toggle (AI / 2P)
                     Container(
                       decoration: BoxDecoration(
-                        color: AppColors.cardBg,
+                        color: Colors.white.withOpacity(0.92),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.divider),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -273,9 +294,9 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
                               }
                             },
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(
-                                color: !_isTwoPlayer ? AppColors.primaryAccent : Colors.transparent,
+                                color: !_isTwoPlayer ? const Color(0xFF7E52FF) : Colors.transparent,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -283,7 +304,7 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
-                                  color: !_isTwoPlayer ? Colors.white : AppColors.secondaryText,
+                                  color: !_isTwoPlayer ? Colors.white : const Color(0xFF5D4037),
                                 ),
                               ),
                             ),
@@ -298,9 +319,9 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
                               }
                             },
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(
-                                color: _isTwoPlayer ? AppColors.secondaryAccent : Colors.transparent,
+                                color: _isTwoPlayer ? const Color(0xFF7E52FF) : Colors.transparent,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -308,7 +329,7 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
-                                  color: _isTwoPlayer ? Colors.white : AppColors.secondaryText,
+                                  color: _isTwoPlayer ? Colors.white : const Color(0xFF5D4037),
                                 ),
                               ),
                             ),
@@ -316,14 +337,28 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
                         ],
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.replay_rounded, color: AppColors.primaryAccent),
-                      onPressed: _resetMatch,
+                    const SizedBox(width: 6),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.18),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.replay_rounded, color: Color(0xFF7E52FF), size: 18),
+                        onPressed: _resetMatch,
+                      ),
                     ),
                   ],
                 ),
 
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
 
                 // Target Wins Selector (First to 3, 5, 7)
                 Row(
@@ -339,14 +374,20 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
                         margin: const EdgeInsets.symmetric(horizontal: 6),
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                         decoration: BoxDecoration(
-                          color: isSel ? AppColors.primaryAccent.withOpacity(0.2) : AppColors.cardBg,
+                          color: isSel ? const Color(0xFF7E52FF) : Colors.white.withOpacity(0.9),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: isSel ? AppColors.primaryAccent : AppColors.divider),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.15),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Text(
                           'First to $target',
                           style: AppTypography.labelSmall.copyWith(
-                            color: isSel ? AppColors.primaryAccent : AppColors.secondaryText,
+                            color: isSel ? Colors.white : const Color(0xFF2C2416),
                             fontWeight: isSel ? FontWeight.w700 : FontWeight.w500,
                           ),
                         ),
@@ -361,16 +402,23 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildScorePill(_isTwoPlayer ? 'Player 1' : 'You', _playerScore, AppColors.primaryAccent),
+                    _buildScorePill(_isTwoPlayer ? 'Player 1' : 'You', _playerScore, const Color(0xFF7E52FF)),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: AppColors.cardBg,
-                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                      child: Text('Draws: $_draws', style: AppTypography.bodySmall),
+                      child: Text('Draws: $_draws', style: AppTypography.bodySmall.copyWith(color: const Color(0xFF5D4037), fontWeight: FontWeight.bold)),
                     ),
-                    _buildScorePill(_isTwoPlayer ? 'Player 2' : 'AI Bot', _aiScore, AppColors.secondaryAccent),
+                    _buildScorePill(_isTwoPlayer ? 'Player 2' : 'AI Bot', _aiScore, const Color(0xFFF97316)),
                   ],
                 ),
 
@@ -381,36 +429,42 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   decoration: BoxDecoration(
-                    color: AppColors.elevatedCard,
+                    color: Colors.black.withOpacity(0.4),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.divider),
+                    border: Border.all(color: Colors.white24),
                   ),
                   child: Text(
                     _outcomeText,
-                    style: AppTypography.labelMedium.copyWith(color: AppColors.primaryText),
+                    style: AppTypography.labelMedium.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                 ),
 
                 const SizedBox(height: 8),
 
-                // Responsive Arena Duel Reveal Area
+                // Responsive Realistic Felt Tabletop Playmat Arena
                 Expanded(
                   child: Center(
                     child: FittedBox(
                       fit: BoxFit.contain,
                       child: Container(
                         width: 320,
-                        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
                         decoration: BoxDecoration(
-                          color: AppColors.cardBg,
+                          gradient: const RadialGradient(
+                            colors: [
+                              Color(0xFF1B4D3E),
+                              Color(0xFF0F2E25),
+                              Color(0xFF091C16),
+                            ],
+                          ),
                           borderRadius: BorderRadius.circular(24),
-                          border: Border.all(color: AppColors.primaryAccent.withOpacity(0.4), width: 2),
+                          border: Border.all(color: const Color(0xFFC5A059), width: 3),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.primaryAccent.withOpacity(0.12),
-                              blurRadius: 16,
-                              offset: const Offset(0, 4),
+                              color: Colors.black.withOpacity(0.5),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
                             ),
                           ],
                         ),
@@ -418,54 +472,55 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
                             ? Center(
                                 child: Text(
                                   '$_countdownValue',
-                                  style: AppTypography.monoLarge.copyWith(fontSize: 64, color: AppColors.primaryAccent),
+                                  style: AppTypography.monoLarge.copyWith(fontSize: 64, color: const Color(0xFFFFD54F)),
                                 ),
                               )
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                                 children: [
-                                  // Player 1 Choice
-                                  Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        _phase == _RpsPhase.choose && _isTwoPlayer && _playerChoice != null
-                                            ? '🔒'
-                                            : _playerChoice != null
-                                                ? _getEmoji(_playerChoice!)
-                                                : '❓',
-                                        style: const TextStyle(fontSize: 56),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        _phase == _RpsPhase.choose && _isTwoPlayer && _playerChoice != null
-                                            ? 'Locked In'
-                                            : _playerChoice != null
-                                                ? _getLabel(_playerChoice!)
-                                                : (_isTwoPlayer ? 'Player 1' : 'You'),
-                                        style: AppTypography.labelMedium.copyWith(color: AppColors.primaryAccent),
-                                      ),
-                                    ],
+                                  // Player 1 Realistic Card
+                                  _buildPhysicalPlayCard(
+                                    emoji: _phase == _RpsPhase.choose && _isTwoPlayer && _playerChoice != null
+                                        ? '🔒'
+                                        : _playerChoice != null
+                                            ? _getEmoji(_playerChoice!)
+                                            : '❓',
+                                    label: _phase == _RpsPhase.choose && _isTwoPlayer && _playerChoice != null
+                                        ? 'Locked In'
+                                        : _playerChoice != null
+                                            ? _getLabel(_playerChoice!)
+                                            : (_isTwoPlayer ? 'Player 1' : 'You'),
+                                    accentColor: const Color(0xFF7E52FF),
                                   ),
 
-                                  Text('VS', style: AppTypography.heading3.copyWith(color: AppColors.secondaryText)),
+                                  // Center VS Medallion
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: const LinearGradient(
+                                        colors: [Color(0xFFFFE082), Color(0xFFFFB300), Color(0xFFC5A059)],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.4),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Text('VS', style: TextStyle(color: Color(0xFF3E2723), fontWeight: FontWeight.w900, fontSize: 13)),
+                                  ),
 
-                                  // Player 2 / AI Choice
-                                  Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        _aiChoice != null ? _getEmoji(_aiChoice!) : (_isTwoPlayer ? '👥' : '🤖'),
-                                        style: const TextStyle(fontSize: 56),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        _aiChoice != null
-                                            ? _getLabel(_aiChoice!)
-                                            : (_isTwoPlayer ? 'Player 2' : 'AI Bot'),
-                                        style: AppTypography.labelMedium.copyWith(color: AppColors.secondaryAccent),
-                                      ),
-                                    ],
+                                  // Player 2 / AI Realistic Card
+                                  _buildPhysicalPlayCard(
+                                    emoji: _aiChoice != null ? _getEmoji(_aiChoice!) : (_isTwoPlayer ? '👥' : '🤖'),
+                                    label: _aiChoice != null
+                                        ? _getLabel(_aiChoice!)
+                                        : (_isTwoPlayer ? 'Player 2' : 'AI Bot'),
+                                    accentColor: const Color(0xFFF97316),
                                   ),
                                 ],
                               ),
@@ -476,7 +531,7 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
 
                 const SizedBox(height: 8),
 
-                // 3 Move Selection Cards
+                // 3 Move Selection Cards (Tactile 3D Buttons)
                 if (_phase == _RpsPhase.choose) ...[
                   Row(
                     children: _RpsChoice.values.map((choice) {
@@ -484,17 +539,21 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
                         child: GestureDetector(
                           onTap: () => _onPlayerSelected(choice),
                           child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            margin: const EdgeInsets.symmetric(horizontal: 5),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             decoration: BoxDecoration(
-                              color: AppColors.elevatedCard,
+                              gradient: const LinearGradient(
+                                colors: [Colors.white, Color(0xFFF4F0FF)],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                              ),
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: AppColors.primaryAccent.withOpacity(0.4)),
+                              border: Border.all(color: const Color(0xFFD6C8FF), width: 1.5),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.primaryAccent.withOpacity(0.12),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 3),
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
@@ -503,7 +562,7 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
                               children: [
                                 Text(_getEmoji(choice), style: const TextStyle(fontSize: 34)),
                                 const SizedBox(height: 4),
-                                Text(_getLabel(choice), style: AppTypography.labelSmall.copyWith(fontWeight: FontWeight.w700)),
+                                Text(_getLabel(choice), style: AppTypography.labelSmall.copyWith(color: const Color(0xFF2C2416), fontWeight: FontWeight.bold)),
                               ],
                             ),
                           ),
@@ -513,11 +572,17 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
                   ),
                 ] else if (_phase == _RpsPhase.matchOver) ...[
                   Container(
-                    padding: const EdgeInsets.all(14),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: _playerScore >= _targetWins ? AppColors.success.withOpacity(0.2) : AppColors.error.withOpacity(0.2),
+                      color: Colors.white.withOpacity(0.95),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: _playerScore >= _targetWins ? AppColors.success : AppColors.error),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.25),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -525,11 +590,12 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
                         Text(
                           _playerScore >= _targetWins ? '🏆 MATCH VICTORY!' : '⚡ MATCH DEFEAT',
                           style: AppTypography.heading3.copyWith(
-                            color: _playerScore >= _targetWins ? AppColors.success : AppColors.error,
+                            color: _playerScore >= _targetWins ? const Color(0xFF15803D) : const Color(0xFFB91C1C),
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text('Final Score: You $_playerScore - $_aiScore AI', style: AppTypography.monoMedium),
+                        Text('Final Score: You $_playerScore - $_aiScore AI', style: AppTypography.monoMedium.copyWith(color: const Color(0xFF2C2416))),
                         const SizedBox(height: 10),
                         MindRushButton(
                           label: 'Play Again',
@@ -550,18 +616,55 @@ class _RpsShowdownGameState extends State<RpsShowdownGame> {
     );
   }
 
+  Widget _buildPhysicalPlayCard({required String emoji, required String label, required Color accentColor}) {
+    return Container(
+      width: 95,
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFDF8),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE5D5B8), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.4),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 48)),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: AppTypography.labelSmall.copyWith(color: const Color(0xFF2C2416), fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildScorePill(String label, int score, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.cardBg,
+        color: Colors.white.withOpacity(0.92),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.4)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          Text(label, style: AppTypography.bodySmall.copyWith(fontSize: 11)),
-          Text('$score', style: AppTypography.monoMedium.copyWith(fontSize: 22, color: color)),
+          Text(label, style: AppTypography.bodySmall.copyWith(fontSize: 11, color: const Color(0xFF5D4037), fontWeight: FontWeight.bold)),
+          Text('$score', style: AppTypography.monoMedium.copyWith(fontSize: 22, color: color, fontWeight: FontWeight.bold)),
         ],
       ),
     );

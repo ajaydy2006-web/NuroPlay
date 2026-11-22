@@ -39,21 +39,22 @@ class _LogicPuzzlesScreenState extends State<LogicPuzzlesScreen> {
       _showResult = true;
     });
 
-    final result = provider.submitPuzzleAnswer(opt);
-
-    // Show explanation modal or delay
+    // Show visual feedback on current puzzle for 650ms before advancing
     Future.delayed(const Duration(milliseconds: 650), () {
       if (!mounted) return;
 
+      // Reset feedback state first so the next puzzle is never highlighted
+      setState(() {
+        _selectedOption = null;
+        _showResult = false;
+        _showHint = false;
+        _isProcessing = false;
+      });
+
+      final result = provider.submitPuzzleAnswer(opt);
+
       if (result != null) {
         Navigator.of(context).pushReplacementNamed('/results', arguments: result);
-      } else {
-        setState(() {
-          _selectedOption = null;
-          _showResult = false;
-          _showHint = false;
-          _isProcessing = false;
-        });
       }
     });
   }
@@ -251,6 +252,7 @@ class _LogicPuzzlesScreenState extends State<LogicPuzzlesScreen> {
                       final isCorrect = option == puzzle.correctAnswer;
 
                       return AnswerOptionButton(
+                        key: ValueKey('logic_${puzzle.id}_$option'),
                         label: '$option',
                         isSelected: isSelected,
                         isCorrect: isCorrect,

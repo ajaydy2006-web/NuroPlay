@@ -209,6 +209,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                       final isCorrect = opt == q.correctAnswer;
 
                       return AnswerOptionButton(
+                        key: ValueKey('daily_${q.id}_$opt'),
                         label: '$opt',
                         isSelected: isSelected,
                         isCorrect: isCorrect,
