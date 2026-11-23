@@ -1,11 +1,11 @@
 {
-    "name": "mindrush",
-    "short_name": "mindrush",
+    "name": "NuroPlay",
+    "short_name": "NuroPlay",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#EFEBFE",
+    "theme_color": "#7E52FF",
+    "description": "NuroPlay — Think Fast. Play Smart. Competitive Math, Brain Games, and Real-World Arcades.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
