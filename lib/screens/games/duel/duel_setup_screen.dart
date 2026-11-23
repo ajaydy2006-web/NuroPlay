@@ -231,9 +231,18 @@ class _DuelSetupScreenState extends State<DuelSetupScreen> {
 
                   // ─── Start Match Button ───
                   MindRushButton(
-                    label: _isSearching ? 'Finding Opponent...' : 'Find Match & Start Duel ⚔️',
+                    label: _isSearching ? 'Finding Opponent...' : 'Find AI Match & Start Duel 🤖',
                     isLoading: _isSearching,
                     onPressed: () => _startMatchmaking(context),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // ─── Friend Room Button ───
+                  MindRushButton(
+                    label: 'Create or Join Room with Friends 👥',
+                    isOutlined: true,
+                    onPressed: () => Navigator.of(context).pushNamed('/room-duel'),
                   ),
 
                   const SizedBox(height: 12),

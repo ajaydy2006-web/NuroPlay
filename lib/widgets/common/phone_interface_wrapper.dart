@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_typography.dart';
 
 enum DevicePreset {
   iphone('iPhone 15 Pro', 400, 850, 48),
@@ -43,60 +42,56 @@ class _PhoneInterfaceWrapperState extends State<PhoneInterfaceWrapper> {
         final targetHeight = min(_activePreset.height, constraints.maxHeight - 50);
 
         return Scaffold(
-          backgroundColor: const Color(0xFF030509),
+          backgroundColor: const Color(0xFFE2D6F5),
           body: Stack(
             children: [
-              // Central Neon Rise bloom on canvas
-              Center(
+              // Ambient soft 3D background orbs on desktop canvas
+              Positioned(
+                top: -60,
+                left: 60,
                 child: Container(
-                  width: 500,
-                  height: 500,
+                  width: 320,
+                  height: 320,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: RadialGradient(
+                    gradient: const RadialGradient(
                       colors: [
-                        AppColors.primaryAccent.withOpacity(0.14),
-                        AppColors.secondaryAccent.withOpacity(0.06),
+                        Color(0xFFFFE177),
+                        Color(0xFFFFD555),
                         Colors.transparent,
                       ],
-                      stops: const [0.0, 0.45, 1.0],
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFFFD555).withOpacity(0.3),
+                        blurRadius: 40,
+                      ),
+                    ],
                   ),
                 ),
               ),
 
-              // Subtle background mesh orbs on desktop canvas
               Positioned(
-                top: -80,
-                left: 100,
+                bottom: -80,
+                right: 80,
                 child: Container(
-                  width: 380,
-                  height: 380,
+                  width: 340,
+                  height: 340,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: RadialGradient(
+                    gradient: const RadialGradient(
                       colors: [
-                        AppColors.secondaryAccent.withOpacity(0.08),
+                        Color(0xFFFF9DB4),
+                        Color(0xFFFFA5BA),
                         Colors.transparent,
                       ],
                     ),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: -100,
-                right: 120,
-                child: Container(
-                  width: 420,
-                  height: 420,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        AppColors.primaryAccent.withOpacity(0.07),
-                        Colors.transparent,
-                      ],
-                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFFF8DA1).withOpacity(0.3),
+                        blurRadius: 40,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -105,14 +100,20 @@ class _PhoneInterfaceWrapperState extends State<PhoneInterfaceWrapper> {
               SafeArea(
                 child: Column(
                   children: [
-                    // Top Desktop Device Switcher Bar
+                    // Top Desktop Device Switcher Bar (White Clay Pill)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryBg.withOpacity(0.85),
-                        border: const Border(
-                          bottom: BorderSide(color: AppColors.divider, width: 0.8),
-                        ),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x147E52FF),
+                            blurRadius: 16,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: Row(
                         children: [
@@ -121,17 +122,18 @@ class _PhoneInterfaceWrapperState extends State<PhoneInterfaceWrapper> {
                               Container(
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
-                                  gradient: AppColors.vibrantMixGradient,
-                                  borderRadius: BorderRadius.circular(8),
+                                  gradient: AppColors.accentGradient,
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: const Icon(Icons.phone_iphone_rounded, size: 16, color: Colors.white),
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'NuroPlay Phone View',
-                                style: AppTypography.heading3.copyWith(
-                                  fontSize: 16,
-                                  color: AppColors.creamText,
+                              const SizedBox(width: 10),
+                              const Text(
+                                'NuroPlay 3D Clay UI',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w900,
+                                  color: Color(0xFF1E1842),
                                 ),
                               ),
                             ],
@@ -139,11 +141,10 @@ class _PhoneInterfaceWrapperState extends State<PhoneInterfaceWrapper> {
                           const Spacer(),
                           // Presets Selector
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
                             decoration: BoxDecoration(
-                              color: AppColors.cardBg,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: AppColors.divider),
+                              color: const Color(0xFFF3EEFD),
+                              borderRadius: BorderRadius.circular(14),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -152,17 +153,26 @@ class _PhoneInterfaceWrapperState extends State<PhoneInterfaceWrapper> {
                                 return GestureDetector(
                                   onTap: () => setState(() => _activePreset = preset),
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                     decoration: BoxDecoration(
-                                      color: isSel ? AppColors.primaryAccent : Colors.transparent,
-                                      borderRadius: BorderRadius.circular(8),
+                                      color: isSel ? const Color(0xFF7E52FF) : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(10),
+                                      boxShadow: isSel
+                                          ? const [
+                                              BoxShadow(
+                                                color: Color(0x337E52FF),
+                                                blurRadius: 6,
+                                                offset: Offset(0, 2),
+                                              ),
+                                            ]
+                                          : null,
                                     ),
                                     child: Text(
                                       preset.label,
                                       style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        color: isSel ? Colors.white : AppColors.secondaryText,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w800,
+                                        color: isSel ? Colors.white : const Color(0xFF8680A6),
                                       ),
                                     ),
                                   ),
@@ -180,23 +190,23 @@ class _PhoneInterfaceWrapperState extends State<PhoneInterfaceWrapper> {
                         child: Container(
                           width: targetWidth,
                           height: targetHeight,
-                          margin: const EdgeInsets.symmetric(vertical: 16),
+                          margin: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
                             color: AppColors.primaryBg,
                             borderRadius: BorderRadius.circular(_activePreset.radius),
                             border: Border.all(
-                              color: const Color(0xFF142036),
+                              color: const Color(0xFF1E1538),
                               width: 8,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.85),
+                                color: const Color(0x3A441B9B),
                                 blurRadius: 40,
                                 spreadRadius: 4,
                                 offset: const Offset(0, 16),
                               ),
                               BoxShadow(
-                                color: AppColors.primaryAccent.withOpacity(0.20),
+                                color: AppColors.primaryAccent.withOpacity(0.18),
                                 blurRadius: 28,
                                 spreadRadius: 1,
                               ),
@@ -206,58 +216,59 @@ class _PhoneInterfaceWrapperState extends State<PhoneInterfaceWrapper> {
                             borderRadius: BorderRadius.circular(_activePreset.radius - 8),
                             child: Stack(
                               children: [
-                                // Inner App Application with proper simulated SafeArea insets
+                                // Inner App with simulated SafeArea insets
                                 Positioned.fill(
                                   child: MediaQuery(
                                     data: MediaQuery.of(context).copyWith(
-                                      padding: const EdgeInsets.only(top: 42, bottom: 22),
-                                      viewPadding: const EdgeInsets.only(top: 42, bottom: 22),
+                                      padding: const EdgeInsets.only(top: 44, bottom: 20),
+                                      viewPadding: const EdgeInsets.only(top: 44, bottom: 20),
                                     ),
                                     child: widget.child,
                                   ),
                                 ),
 
-                                // Phone Notch / Dynamic Island at top
+                                // Top Status Bar (8:48, WiFi, Signal, 77% Battery as in screenshot)
                                 Positioned(
-                                  top: 10,
-                                  left: 0,
-                                  right: 0,
+                                  top: 8,
+                                  left: 24,
+                                  right: 24,
                                   child: IgnorePointer(
-                                    child: Center(
-                                      child: Container(
-                                        width: 116,
-                                        height: 24,
-                                        decoration: BoxDecoration(
-                                          color: Colors.black,
-                                          borderRadius: BorderRadius.circular(20),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          '8:48',
+                                          style: TextStyle(
+                                            color: Color(0xFF1E1842),
+                                            fontWeight: FontWeight.w900,
+                                            fontSize: 13,
+                                          ),
                                         ),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            Container(
-                                              width: 10,
-                                              height: 10,
-                                              decoration: const BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Color(0xFF0F172A),
-                                              ),
-                                            ),
-                                            Container(
-                                              width: 7,
-                                              height: 7,
-                                              decoration: const BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Color(0xFF0091FF),
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: const [
+                                            Icon(Icons.signal_cellular_alt_rounded, size: 14, color: Color(0xFF1E1842)),
+                                            SizedBox(width: 4),
+                                            Icon(Icons.wifi_rounded, size: 14, color: Color(0xFF1E1842)),
+                                            SizedBox(width: 4),
+                                            Icon(Icons.battery_5_bar_rounded, size: 16, color: Color(0xFF1E1842)),
+                                            SizedBox(width: 2),
+                                            Text(
+                                              '77',
+                                              style: TextStyle(
+                                                color: Color(0xFF1E1842),
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w900,
                                               ),
                                             ),
                                           ],
                                         ),
-                                      ),
+                                      ],
                                     ),
                                   ),
                                 ),
 
-                                // Bottom Home Bar Gesture Pill
+                                // Bottom Home Gesture Pill
                                 Positioned(
                                   bottom: 6,
                                   left: 0,
@@ -268,7 +279,7 @@ class _PhoneInterfaceWrapperState extends State<PhoneInterfaceWrapper> {
                                         width: 120,
                                         height: 4,
                                         decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.35),
+                                          color: const Color(0xFF1E1842).withOpacity(0.3),
                                           borderRadius: BorderRadius.circular(2),
                                         ),
                                       ),

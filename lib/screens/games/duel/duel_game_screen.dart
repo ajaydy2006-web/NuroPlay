@@ -55,23 +55,26 @@ class _DuelGameScreenState extends State<DuelGameScreen> {
       _showFeedback = true;
     });
 
-    final provider = context.read<GameProvider>();
-    final result = provider.submitAnswer(answer);
-
-    // Short delay to show green/red visual response
+    // Show visual feedback on the current question for 500ms before advancing
     Future.delayed(const Duration(milliseconds: 500), () {
       if (!mounted) return;
+
+      final provider = context.read<GameProvider>();
+
+      // Reset feedback state first so the next question is never highlighted
+      setState(() {
+        _selectedAnswer = null;
+        _showFeedback = false;
+        _isProcessingAnswer = false;
+      });
+
+      final result = provider.submitAnswer(answer);
 
       if (result != null) {
         // Game finished!
         Navigator.of(context).pushReplacementNamed('/results', arguments: result);
       } else {
-        // Next question
-        setState(() {
-          _selectedAnswer = null;
-          _showFeedback = false;
-          _isProcessingAnswer = false;
-        });
+        // Start timer for next question
         _startTimer();
       }
     });
@@ -155,9 +158,10 @@ class _DuelGameScreenState extends State<DuelGameScreen> {
                           child: DuelScoreBar(
                             playerName: provider.profile.username,
                             playerScore: provider.score,
-                            opponentName: provider.botName,
+                            opponentName: provider.opponentName,
                             opponentScore: provider.botScore,
                             playerEmoji: provider.profile.avatarEmoji ?? '🧠',
+                            opponentEmoji: provider.opponentEmoji,
                           ),
                         ),
                       ],
@@ -266,6 +270,7 @@ class _DuelGameScreenState extends State<DuelGameScreen> {
                         final isCorrect = option == currentQ.correctAnswer;
 
                         return AnswerOptionButton(
+                          key: ValueKey('duel_${currentQ.id}_$option'),
                           label: '$option',
                           isSelected: isSelected,
                           isCorrect: isCorrect,

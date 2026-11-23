@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../widgets/common/common_widgets.dart';
+import 'realistic_game_components.dart';
 
 class FourInRowGame extends StatefulWidget {
   const FourInRowGame({super.key});
@@ -183,9 +184,10 @@ class _FourInRowGameState extends State<FourInRowGame> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primaryBg,
-      body: NeonRiseBackground(
-        showMiddleBeam: true,
+      backgroundColor: const Color(0xFF140A05),
+      body: RealisticWoodTableSurface(
+        isDarkWood: true,
+        tintColor: const Color(0xFF2E190E),
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -309,16 +311,20 @@ class _FourInRowGameState extends State<FourInRowGame> {
                     child: FittedBox(
                       fit: BoxFit.contain,
                       child: Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0F1E36), // Deep cyber blue frame
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(color: AppColors.primaryAccent.withOpacity(0.5), width: 2.5),
+                          gradient: const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xFF1E88E5), Color(0xFF1565C0), Color(0xFF0D47A1)],
+                          ),
+                          borderRadius: BorderRadius.circular(26),
+                          border: Border.all(color: const Color(0xFF42A5F5), width: 4),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.primaryAccent.withOpacity(0.18),
-                              blurRadius: 20,
-                              offset: const Offset(0, 6),
+                              color: Colors.black.withOpacity(0.55),
+                              blurRadius: 24,
+                              offset: const Offset(0, 10),
                             ),
                           ],
                         ),
@@ -332,30 +338,14 @@ class _FourInRowGameState extends State<FourInRowGame> {
                                 final val = _board[r][c];
                                 final isWinning = _winningCoords?.any((p) => p.x == r && p.y == c) ?? false;
 
-                                Color discColor = const Color(0xFF070B14); // Empty slot hole
-                                if (val == 1) discColor = AppColors.primaryAccent;
-                                if (val == 2) discColor = AppColors.secondaryAccent;
-
                                 return GestureDetector(
                                   onTap: () => _onColumnTap(c),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 200),
-                                    width: 36,
-                                    height: 36,
-                                    margin: const EdgeInsets.all(3),
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: discColor,
-                                      border: isWinning
-                                          ? Border.all(color: Colors.white, width: 3)
-                                          : Border.all(color: Colors.black.withOpacity(0.4), width: 1.5),
-                                      boxShadow: [
-                                        if (val != 0)
-                                          BoxShadow(
-                                            color: discColor.withOpacity(0.5),
-                                            blurRadius: isWinning ? 12 : 4,
-                                          ),
-                                      ],
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(3.5),
+                                    child: RealisticConnect4Disc(
+                                      player: val,
+                                      size: 38,
+                                      isWinning: isWinning,
                                     ),
                                   ),
                                 );

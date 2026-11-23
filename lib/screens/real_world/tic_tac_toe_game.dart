@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../widgets/common/common_widgets.dart';
+import 'realistic_game_components.dart';
 
 class TicTacToeGame extends StatefulWidget {
   const TicTacToeGame({super.key});
@@ -174,9 +175,10 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primaryBg,
-      body: NeonRiseBackground(
-        showMiddleBeam: true,
+      backgroundColor: const Color(0xFF140A05),
+      body: RealisticWoodTableSurface(
+        isDarkWood: true,
+        tintColor: const Color(0xFF241208),
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -309,18 +311,22 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
                     child: FittedBox(
                       fit: BoxFit.contain,
                       child: Container(
-                        width: 300,
-                        height: 300,
-                        padding: const EdgeInsets.all(12),
+                        width: 310,
+                        height: 310,
+                        padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: AppColors.cardBg,
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(color: AppColors.primaryAccent.withOpacity(0.4), width: 2),
+                          gradient: const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xFF3B2012), Color(0xFF261208), Color(0xFF190B04)],
+                          ),
+                          borderRadius: BorderRadius.circular(28),
+                          border: Border.all(color: const Color(0xFF5A321B), width: 6),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.primaryAccent.withOpacity(0.12),
-                              blurRadius: 18,
-                              offset: const Offset(0, 4),
+                              color: Colors.black.withOpacity(0.7),
+                              blurRadius: 28,
+                              offset: const Offset(0, 12),
                             ),
                           ],
                         ),
@@ -342,25 +348,27 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
                                 duration: const Duration(milliseconds: 200),
                                 decoration: BoxDecoration(
                                   color: isWinning
-                                      ? (val == 'X' ? AppColors.primaryAccent : AppColors.secondaryAccent).withOpacity(0.25)
-                                      : AppColors.elevatedCard,
-                                  borderRadius: BorderRadius.circular(16),
+                                      ? (val == 'X' ? const Color(0xFFFF5252) : const Color(0xFF54A0FF)).withOpacity(0.28)
+                                      : const Color(0xFF1E0E06),
+                                  borderRadius: BorderRadius.circular(18),
                                   border: Border.all(
                                     color: isWinning
-                                        ? (val == 'X' ? AppColors.primaryAccent : AppColors.secondaryAccent)
-                                        : AppColors.divider,
-                                    width: isWinning ? 2.5 : 1,
+                                        ? (val == 'X' ? const Color(0xFFFF5252) : const Color(0xFF54A0FF))
+                                        : const Color(0xFF3E1F0F),
+                                    width: isWinning ? 2.5 : 1.5,
                                   ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.35),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
                                 ),
                                 child: Center(
-                                  child: Text(
-                                    val,
-                                    style: AppTypography.monoLarge.copyWith(
-                                      fontSize: 48,
-                                      color: val == 'X' ? AppColors.primaryAccent : AppColors.secondaryAccent,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
+                                  child: val.isNotEmpty
+                                      ? RealisticTttToken(player: val, size: 56)
+                                      : const SizedBox(),
                                 ),
                               ),
                             );

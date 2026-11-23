@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../widgets/common/common_widgets.dart';
 import '../../services/storage_service.dart';
+import 'realistic_game_components.dart';
 
 class MarbleKnockoutGame extends StatefulWidget {
   const MarbleKnockoutGame({super.key});
@@ -199,9 +200,9 @@ class _MarbleKnockoutGameState extends State<MarbleKnockoutGame> with SingleTick
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primaryBg,
-      body: NeonRiseBackground(
-        showMiddleBeam: true,
+      backgroundColor: const Color(0xFF2B1810),
+      body: RealisticWoodTableSurface(
+        isDarkWood: false,
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -210,66 +211,148 @@ class _MarbleKnockoutGameState extends State<MarbleKnockoutGame> with SingleTick
                 // Top Bar
                 Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primaryText, size: 20),
-                      onPressed: () => Navigator.of(context).pop(),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF2C2416), size: 18),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
                     ),
                     Expanded(
-                      child: Text('Marble Knockout', style: AppTypography.heading3, textAlign: TextAlign.center),
+                      child: Text(
+                        'Marble Knockout',
+                        style: AppTypography.heading3.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          shadows: const [
+                            Shadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 2)),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.replay_rounded, color: AppColors.primaryAccent),
-                      onPressed: () => setState(_setupMarbles),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.replay_rounded, color: Color(0xFF7E52FF)),
+                        onPressed: () => setState(_setupMarbles),
+                      ),
                     ),
                   ],
                 ),
 
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
 
-                // Score row
+                // Realistic Score & Stat Badges
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: AppColors.cardBg,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.divider),
+                        color: Colors.white.withOpacity(0.92),
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
                       ),
-                      child: Text('Score: $_score pts', style: AppTypography.monoMedium.copyWith(color: AppColors.primaryAccent, fontSize: 15)),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.stars_rounded, color: Color(0xFFFFB800), size: 18),
+                          const SizedBox(width: 6),
+                          Text('$_score pts', style: AppTypography.monoMedium.copyWith(color: const Color(0xFF2C2416), fontWeight: FontWeight.bold, fontSize: 14)),
+                        ],
+                      ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: AppColors.cardBg,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.divider),
+                        color: Colors.white.withOpacity(0.92),
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
                       ),
-                      child: Text('Knocked: $_knockedCount/7', style: AppTypography.labelSmall.copyWith(color: AppColors.success)),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.check_circle_rounded, color: Color(0xFF22C55E), size: 18),
+                          const SizedBox(width: 6),
+                          Text('Out: $_knockedCount/7', style: AppTypography.labelSmall.copyWith(color: const Color(0xFF15803D), fontWeight: FontWeight.bold)),
+                        ],
+                      ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: AppColors.cardBg,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.warning.withOpacity(0.5)),
+                        color: Colors.white.withOpacity(0.92),
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
                       ),
-                      child: Text('Shots: $_shotsRemaining', style: AppTypography.labelSmall.copyWith(color: AppColors.warning)),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.sports_baseball_rounded, color: Color(0xFFF97316), size: 18),
+                          const SizedBox(width: 6),
+                          Text('Shots: $_shotsRemaining', style: AppTypography.labelSmall.copyWith(color: const Color(0xFFC2410C), fontWeight: FontWeight.bold)),
+                        ],
+                      ),
                     ),
                   ],
                 ),
 
-                const SizedBox(height: 6),
-                Text(
-                  'Pull back on shooter marble to knock targets out of ring!',
-                  style: AppTypography.bodySmall.copyWith(color: AppColors.secondaryText),
-                  textAlign: TextAlign.center,
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.35),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'Pull back and release the shooter to knock marbles out of the ring!',
+                    style: AppTypography.bodySmall.copyWith(color: Colors.white.withOpacity(0.9), fontSize: 11),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
 
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
 
-                // Responsive Marble Ring Arena scaled for phone screens
+                // Responsive Realistic Wooden Tabletop Marble Arena
                 Expanded(
                   child: Center(
                     child: FittedBox(
@@ -283,13 +366,27 @@ class _MarbleKnockoutGameState extends State<MarbleKnockoutGame> with SingleTick
                           onPanEnd: _onPanEnd,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: const Color(0xFF0F172A),
-                              borderRadius: BorderRadius.circular(24),
-                              border: Border.all(color: AppColors.primaryAccent.withOpacity(0.5), width: 2),
+                              shape: BoxShape.circle,
+                              gradient: const RadialGradient(
+                                colors: [
+                                  Color(0xFF1E3A2F),
+                                  Color(0xFF13271F),
+                                  Color(0xFF0B1914),
+                                ],
+                              ),
+                              border: Border.all(
+                                color: const Color(0xFF5A3825),
+                                width: 10,
+                              ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.primaryAccent.withOpacity(0.15),
-                                  blurRadius: 18,
+                                  color: Colors.black.withOpacity(0.55),
+                                  blurRadius: 24,
+                                  offset: const Offset(0, 10),
+                                ),
+                                BoxShadow(
+                                  color: const Color(0xFF8B5A2B).withOpacity(0.4),
+                                  blurRadius: 4,
                                   spreadRadius: 2,
                                 ),
                               ],
@@ -297,7 +394,7 @@ class _MarbleKnockoutGameState extends State<MarbleKnockoutGame> with SingleTick
                             child: Stack(
                               clipBehavior: Clip.none,
                               children: [
-                                // Chalk Ring Circle
+                                // Center Inlaid Brass Chalk Ring
                                 Center(
                                   child: Container(
                                     width: _ringRadius * 2,
@@ -305,14 +402,35 @@ class _MarbleKnockoutGameState extends State<MarbleKnockoutGame> with SingleTick
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: Colors.white.withOpacity(0.4),
+                                        color: const Color(0xFFE2C974).withOpacity(0.75),
                                         width: 2.5,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color(0xFFE2C974).withOpacity(0.2),
+                                          blurRadius: 8,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                // Inner Target Bullseye ring
+                                Center(
+                                  child: Container(
+                                    width: 70,
+                                    height: 70,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.18),
+                                        width: 1.5,
                                       ),
                                     ),
                                   ),
                                 ),
 
-                                // Aiming line
+                                // Aiming Line
                                 if (_dragStart != null && _dragCurrent != null && !_isShooting)
                                   CustomPaint(
                                     size: const Size(_boardSize, _boardSize),
@@ -323,40 +441,29 @@ class _MarbleKnockoutGameState extends State<MarbleKnockoutGame> with SingleTick
                                     ),
                                   ),
 
-                                // Target Marbles
+                                // Realistic Target Marbles with 3D Glass Swirl
                                 ..._marbles.where((m) => !m.isKnockedOut).map((m) {
                                   return Positioned(
                                     left: m.pos.dx - m.radius,
                                     top: m.pos.dy - m.radius,
-                                    child: Container(
-                                      width: m.radius * 2,
-                                      height: m.radius * 2,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: m.color,
-                                        boxShadow: [
-                                          BoxShadow(color: m.color.withOpacity(0.5), blurRadius: 6),
-                                        ],
-                                      ),
+                                    child: RealisticGlassMarble(
+                                      radius: m.radius,
+                                      color: m.color,
+                                      swirlColor: Colors.white70,
+                                      isShooter: false,
                                     ),
                                   );
                                 }),
 
-                                // Shooter Marble
+                                // Realistic Heavy Shooter Glass Marble
                                 Positioned(
                                   left: _shooter.pos.dx - _shooter.radius,
                                   top: _shooter.pos.dy - _shooter.radius,
-                                  child: Container(
-                                    width: _shooter.radius * 2,
-                                    height: _shooter.radius * 2,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: _shooter.color,
-                                      border: Border.all(color: Colors.white, width: 2),
-                                      boxShadow: [
-                                        BoxShadow(color: AppColors.primaryAccent.withOpacity(0.6), blurRadius: 10),
-                                      ],
-                                    ),
+                                  child: RealisticGlassMarble(
+                                    radius: _shooter.radius,
+                                    color: const Color(0xFF4F46E5),
+                                    swirlColor: const Color(0xFFFFD700),
+                                    isShooter: true,
                                   ),
                                 ),
                               ],

@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../widgets/common/common_widgets.dart';
 import '../../services/storage_service.dart';
+import 'realistic_game_components.dart';
 
 class PaperFootballGame extends StatefulWidget {
   const PaperFootballGame({super.key});
@@ -212,9 +213,10 @@ class _PaperFootballGameState extends State<PaperFootballGame> with SingleTicker
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primaryBg,
-      body: NeonRiseBackground(
-        showMiddleBeam: true,
+      backgroundColor: const Color(0xFF221108),
+      body: RealisticWoodTableSurface(
+        isDarkWood: false,
+        tintColor: const Color(0xFFC48B57),
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -470,15 +472,14 @@ class _PaperFootballGameState extends State<PaperFootballGame> with SingleTicker
                                     painter: _AimPainter(start: _dragStart!, current: _dragCurrent!),
                                   ),
 
-                                // The Paper Triangle Football
+                                // The Realistic Folded Origami Paper Triangle Football
                                 Positioned(
                                   left: _ballPos.dx - _ballRadius,
                                   top: _ballPos.dy - _ballRadius,
                                   child: Transform.rotate(
                                     angle: _ballAngle,
-                                    child: CustomPaint(
-                                      size: Size(_ballRadius * 2, _ballRadius * 2),
-                                      painter: _PaperTrianglePainter(),
+                                    child: RealisticPaperFootballTriangle(
+                                      size: _ballRadius * 2,
                                     ),
                                   ),
                                 ),

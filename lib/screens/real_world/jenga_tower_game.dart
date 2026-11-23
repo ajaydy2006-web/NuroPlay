@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../widgets/common/common_widgets.dart';
 import '../../services/storage_service.dart';
+import 'realistic_game_components.dart';
 
 enum JengaGameMode { solo, vsAi, passAndPlay }
 
@@ -330,9 +331,9 @@ class _JengaTowerGameState extends State<JengaTowerGame>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
-      body: NeonRiseBackground(
-        showMiddleBeam: true,
+      backgroundColor: const Color(0xFF1E130D),
+      body: RealisticWoodTableSurface(
+        isDarkWood: true,
         child: SafeArea(
           child: Column(
             children: [
@@ -341,15 +342,28 @@ class _JengaTowerGameState extends State<JengaTowerGame>
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 20),
-                      onPressed: () => Navigator.pop(context),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF2C2416), size: 18),
+                        onPressed: () => Navigator.pop(context),
+                      ),
                     ),
                     Expanded(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('Jenga Tower', style: AppTypography.heading3.copyWith(fontSize: 16)),
+                          Text('Jenga Tower', style: AppTypography.heading3.copyWith(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
                           Text(
                             _mode == JengaGameMode.solo
                                 ? 'Solo Tower Builder'
@@ -359,7 +373,7 @@ class _JengaTowerGameState extends State<JengaTowerGame>
                                         ? 'WoodBot is thinking...'
                                         : 'Your Turn',
                             style: AppTypography.captionSmall.copyWith(
-                              color: _currentPlayer == 1 ? AppColors.primaryAccent : AppColors.warning,
+                              color: _currentPlayer == 1 ? const Color(0xFFFFD54F) : const Color(0xFFF97316),
                               fontWeight: FontWeight.bold,
                               fontSize: 11,
                             ),
@@ -367,13 +381,40 @@ class _JengaTowerGameState extends State<JengaTowerGame>
                         ],
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.info_outline_rounded, color: AppColors.textSecondary, size: 20),
-                      onPressed: _showRulesDialog,
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.info_outline_rounded, color: Color(0xFF5D4037), size: 18),
+                        onPressed: _showRulesDialog,
+                      ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.refresh_rounded, color: AppColors.primaryAccent, size: 20),
-                      onPressed: () => setState(_initTower),
+                    const SizedBox(width: 6),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.refresh_rounded, color: Color(0xFF7E52FF), size: 18),
+                        onPressed: () => setState(_initTower),
+                      ),
                     ),
                   ],
                 ),
@@ -386,29 +427,35 @@ class _JengaTowerGameState extends State<JengaTowerGame>
                 children: [
                   // Mode Selector
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceDark,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.surfaceBorder),
+                      color: Colors.white.withOpacity(0.92),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.18),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<JengaGameMode>(
                         value: _mode,
-                        dropdownColor: AppColors.surfaceDark,
-                        icon: const Icon(Icons.arrow_drop_down, color: AppColors.primaryAccent),
+                        dropdownColor: const Color(0xFF2B1B14),
+                        icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF7E52FF)),
                         items: const [
                           DropdownMenuItem(
                             value: JengaGameMode.solo,
-                            child: Text('Solo Tower', style: TextStyle(color: Colors.white, fontSize: 13)),
+                            child: Text('Solo Tower', style: TextStyle(color: Color(0xFF2C2416), fontSize: 13, fontWeight: FontWeight.bold)),
                           ),
                           DropdownMenuItem(
                             value: JengaGameMode.vsAi,
-                            child: Text('vs WoodBot AI', style: TextStyle(color: Colors.white, fontSize: 13)),
+                            child: Text('vs WoodBot AI', style: TextStyle(color: Color(0xFF2C2416), fontSize: 13, fontWeight: FontWeight.bold)),
                           ),
                           DropdownMenuItem(
                             value: JengaGameMode.passAndPlay,
-                            child: Text('2P Pass & Play', style: TextStyle(color: Colors.white, fontSize: 13)),
+                            child: Text('2P Pass & Play', style: TextStyle(color: Color(0xFF2C2416), fontSize: 13, fontWeight: FontWeight.bold)),
                           ),
                         ],
                         onChanged: (m) {
@@ -424,18 +471,32 @@ class _JengaTowerGameState extends State<JengaTowerGame>
                   ),
                   const Spacer(),
                   // Height & Score
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Height: ${_floors.length} Floors',
-                        style: AppTypography.bodySmall.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        'Score: $_score',
-                        style: AppTypography.captionSmall.copyWith(color: AppColors.primaryAccent),
-                      ),
-                    ],
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.92),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.18),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Height: ${_floors.length} Floors',
+                          style: AppTypography.bodySmall.copyWith(color: const Color(0xFF2C2416), fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'Score: $_score',
+                          style: AppTypography.captionSmall.copyWith(color: const Color(0xFF7E52FF), fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -496,22 +557,25 @@ class _JengaTowerGameState extends State<JengaTowerGame>
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Wooden Table Surface
+                  // Realistic Wooden Table Surface Pedestal
                   Positioned(
                     bottom: 0,
-                    left: 20,
-                    right: 20,
-                    height: 24,
+                    left: 14,
+                    right: 14,
+                    height: 28,
                     child: Container(
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF5D4037), Color(0xFF3E2723)],
+                          colors: [Color(0xFF5D3E2F), Color(0xFF3E2723), Color(0xFF2B1810)],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
                         ),
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                        border: Border.all(color: const Color(0xFF8D6E63), width: 1.5),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.5),
-                            blurRadius: 10,
+                            color: Colors.black.withOpacity(0.65),
+                            blurRadius: 16,
                             offset: const Offset(0, -4),
                           ),
                         ],
@@ -567,23 +631,23 @@ class _JengaTowerGameState extends State<JengaTowerGame>
                                               begin: Alignment.topLeft,
                                               end: Alignment.bottomRight,
                                               colors: isSelected
-                                                  ? [const Color(0xFFFFD54F), const Color(0xFFFFB300)]
+                                                  ? [const Color(0xFFFFE082), const Color(0xFFFFB300)]
                                                   : isTopTwo
-                                                      ? [const Color(0xFF8D6E63), const Color(0xFF6D4C41)]
+                                                      ? [const Color(0xFFA1887F), const Color(0xFF6D4C41)]
                                                       : isEvenFloor
-                                                          ? [const Color(0xFFD7CCC8), const Color(0xFFA1887F)]
-                                                          : [const Color(0xFFBCAAA4), const Color(0xFF8D6E63)],
+                                                          ? [const Color(0xFFF5E6D3), const Color(0xFFDCC19F), const Color(0xFFC4A076)]
+                                                          : [const Color(0xFFEEDBC7), const Color(0xFFD5B892), const Color(0xFFBE976B)],
                                             ),
                                             borderRadius: BorderRadius.circular(4),
                                             border: Border.all(
                                               color: isSelected
-                                                  ? AppColors.primaryAccent
-                                                  : const Color(0xFF4E342E),
+                                                  ? const Color(0xFFFFB300)
+                                                  : const Color(0xFF6D4C41).withOpacity(0.7),
                                               width: isSelected ? 2 : 1,
                                             ),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.black.withOpacity(0.3),
+                                                color: Colors.black.withOpacity(0.4),
                                                 blurRadius: 4,
                                                 offset: const Offset(1, 2),
                                               ),
@@ -591,7 +655,7 @@ class _JengaTowerGameState extends State<JengaTowerGame>
                                           ),
                                           child: Center(
                                             child: isTopTwo
-                                                ? const Icon(Icons.lock_rounded, size: 12, color: Colors.white38)
+                                                ? const Icon(Icons.lock_rounded, size: 12, color: Colors.white54)
                                                 : isSelected
                                                     ? const Icon(Icons.drag_indicator_rounded, size: 14, color: Colors.black87)
                                                     : null,
@@ -623,13 +687,13 @@ class _JengaTowerGameState extends State<JengaTowerGame>
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceDark,
+                  color: Colors.white.withOpacity(0.95),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.primaryAccent.withOpacity(0.5)),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primaryAccent.withOpacity(0.15),
-                      blurRadius: 12,
+                      color: Colors.black.withOpacity(0.25),
+                      blurRadius: 14,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -641,22 +705,22 @@ class _JengaTowerGameState extends State<JengaTowerGame>
                         Text(
                           'Floor ${_selectedBlock!.floor + 1} • ${_selectedBlock!.slot == 0 ? "Left" : _selectedBlock!.slot == 1 ? "Center" : "Right"} Block',
                           style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.primaryAccent,
+                            color: const Color(0xFF7E52FF),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
                           '${(_pullProgress * 100).toInt()}% Pulled',
-                          style: AppTypography.captionSmall.copyWith(color: AppColors.textSecondary),
+                          style: AppTypography.captionSmall.copyWith(color: const Color(0xFF2C2416), fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     SliderTheme(
                       data: SliderTheme.of(context).copyWith(
-                        activeTrackColor: AppColors.primaryAccent,
-                        inactiveTrackColor: AppColors.surfaceBorder,
-                        thumbColor: Colors.white,
+                        activeTrackColor: const Color(0xFF7E52FF),
+                        inactiveTrackColor: const Color(0xFFE2DDF5),
+                        thumbColor: const Color(0xFF7E52FF),
                         trackHeight: 6,
                       ),
                       child: Slider(
@@ -669,15 +733,15 @@ class _JengaTowerGameState extends State<JengaTowerGame>
                         Expanded(
                           child: OutlinedButton(
                             style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: AppColors.surfaceBorder),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              side: const BorderSide(color: Color(0xFFCCC4E8)),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                             ),
                             onPressed: () => setState(() {
                               _selectedBlock = null;
                               _pullProgress = 0.0;
                               _calculateInstability();
                             }),
-                            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+                            child: const Text('Cancel', style: TextStyle(color: Color(0xFF6B5E7A))),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -685,15 +749,15 @@ class _JengaTowerGameState extends State<JengaTowerGame>
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: _pullProgress >= 0.85
-                                  ? AppColors.primaryAccent
-                                  : AppColors.surfaceBorder,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  ? const Color(0xFF7E52FF)
+                                  : const Color(0xFFCCC4E8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                             ),
                             onPressed: _pullProgress >= 0.85 ? _completeBlockPull : null,
                             child: Text(
                               'Stack on Top',
                               style: TextStyle(
-                                color: _pullProgress >= 0.85 ? Colors.black : AppColors.textTertiary,
+                                color: _pullProgress >= 0.85 ? Colors.white : Colors.white70,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

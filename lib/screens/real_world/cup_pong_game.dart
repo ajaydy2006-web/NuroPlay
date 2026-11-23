@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../widgets/common/common_widgets.dart';
+import 'realistic_game_components.dart';
 import '../../services/storage_service.dart';
 
 class CupPongGame extends StatefulWidget {
@@ -221,9 +222,10 @@ class _CupPongGameState extends State<CupPongGame> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primaryBg,
-      body: NeonRiseBackground(
-        showMiddleBeam: true,
+      backgroundColor: const Color(0xFF140905),
+      body: RealisticWoodTableSurface(
+        isDarkWood: true,
+        tintColor: const Color(0xFF2E190E),
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -391,61 +393,39 @@ class _CupPongGameState extends State<CupPongGame> with SingleTickerProviderStat
                           child: Container(
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [Color(0xFF042F2E), Color(0xFF0D4B44), Color(0xFF06332D)],
+                                colors: [Color(0xFF8B5A2B), Color(0xFF6B4226), Color(0xFF5C3317)],
                                 begin: Alignment.topCenter,
                                 end: Alignment.bottomCenter,
                               ),
                               borderRadius: BorderRadius.circular(24),
-                              border: Border.all(color: AppColors.primaryAccent.withOpacity(0.5), width: 3),
+                              border: Border.all(color: const Color(0xFF4A2A18), width: 6),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.primaryAccent.withOpacity(0.15),
-                                  blurRadius: 20,
-                                  spreadRadius: 2,
+                                  color: Colors.black.withOpacity(0.6),
+                                  blurRadius: 24,
+                                  offset: const Offset(0, 10),
                                 ),
                               ],
                             ),
                             child: Stack(
                               clipBehavior: Clip.none,
                               children: [
-                                // Center table line
+                                // Center regulation table line
                                 Positioned(
                                   top: 0,
                                   bottom: 0,
                                   left: _vWidth / 2 - 1,
-                                  child: Container(width: 2, color: Colors.white.withOpacity(0.3)),
+                                  child: Container(width: 2, color: Colors.white.withOpacity(0.4)),
                                 ),
 
-                                // Red Solo Cups
+                                // Realistic 3D Red Solo Cups with White Lips
                                 ..._cups.where((c) => !c.isCleared).map((c) {
                                   return Positioned(
-                                    left: c.pos.dx - 18,
-                                    top: c.pos.dy - 18,
-                                    child: Container(
-                                      width: 36,
-                                      height: 36,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: const Color(0xFFDC2626), // Solo cup red rim
-                                        border: Border.all(color: Colors.white, width: 2),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withOpacity(0.5),
-                                            blurRadius: 6,
-                                            offset: const Offset(0, 3),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Center(
-                                        child: Container(
-                                          width: 22,
-                                          height: 22,
-                                          decoration: const BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: Color(0xFF7F1D1D),
-                                          ),
-                                        ),
-                                      ),
+                                    left: c.pos.dx - 20,
+                                    top: c.pos.dy - 20,
+                                    child: RealisticRedSoloCup(
+                                      size: 40,
+                                      isCleared: c.isCleared,
                                     ),
                                   );
                                 }),
@@ -457,27 +437,13 @@ class _CupPongGameState extends State<CupPongGame> with SingleTickerProviderStat
                                     painter: _PongAimPainter(start: _dragStart!, current: _dragCurrent!),
                                   ),
 
-                                // Ping Pong Ball
+                                // Realistic 3D Ping Pong Ball
                                 Positioned(
                                   left: _ballScreenPos.dx - (14 * _ballScale),
                                   top: _ballScreenPos.dy - (14 * _ballScale),
                                   child: Transform.scale(
                                     scale: _ballScale,
-                                    child: Container(
-                                      width: 28,
-                                      height: 28,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: const Color(0xFFF8FAFC),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withOpacity(0.5),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                    child: const RealisticPingPongBall(size: 28),
                                   ),
                                 ),
                               ],

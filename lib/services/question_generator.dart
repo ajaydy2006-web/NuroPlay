@@ -10,42 +10,45 @@ class QuestionGenerator {
     required int count,
     required Difficulty difficulty,
     MathOperation operation = MathOperation.mixed,
+    Random? random,
   }) {
+    final rng = random ?? _random;
     final questions = <MathQuestion>[];
     for (int i = 0; i < count; i++) {
       final op = operation == MathOperation.mixed
-          ? MathOperation.values[_random.nextInt(4)]
+          ? MathOperation.values[rng.nextInt(4)]
           : operation;
-      questions.add(_generateQuestion(i, difficulty, op));
+      questions.add(_generateQuestion(i, difficulty, op, rng));
     }
     return questions;
   }
 
-  static MathQuestion _generateQuestion(int id, Difficulty difficulty, MathOperation op) {
+  static MathQuestion _generateQuestion(int id, Difficulty difficulty, MathOperation op, [Random? random]) {
+    final rng = random ?? _random;
     int a, b, answer;
     final range = _getRange(difficulty);
 
     switch (op) {
       case MathOperation.addition:
-        a = _random.nextInt(range) + 1;
-        b = _random.nextInt(range) + 1;
+        a = rng.nextInt(range) + 1;
+        b = rng.nextInt(range) + 1;
         answer = a + b;
         break;
       case MathOperation.subtraction:
-        a = _random.nextInt(range) + range ~/ 2;
-        b = _random.nextInt(a) + 1;
+        a = rng.nextInt(range) + range ~/ 2;
+        b = rng.nextInt(a) + 1;
         answer = a - b;
         break;
       case MathOperation.multiplication:
         final mRange = _getMulRange(difficulty);
-        a = _random.nextInt(mRange) + 2;
-        b = _random.nextInt(mRange) + 2;
+        a = rng.nextInt(mRange) + 2;
+        b = rng.nextInt(mRange) + 2;
         answer = a * b;
         break;
       case MathOperation.division:
         final dRange = _getMulRange(difficulty);
-        b = _random.nextInt(dRange) + 2;
-        answer = _random.nextInt(dRange) + 1;
+        b = rng.nextInt(dRange) + 2;
+        answer = rng.nextInt(dRange) + 1;
         a = b * answer; // Ensures clean division
         break;
       case MathOperation.mixed:
@@ -54,7 +57,7 @@ class QuestionGenerator {
         break;
     }
 
-    final options = _generateOptions(answer, difficulty);
+    final options = _generateOptions(answer, difficulty, rng);
 
     return MathQuestion(
       id: id,
@@ -84,7 +87,8 @@ class QuestionGenerator {
     }
   }
 
-  static List<int> _generateOptions(int correct, Difficulty difficulty) {
+  static List<int> _generateOptions(int correct, Difficulty difficulty, [Random? random]) {
+    final rng = random ?? _random;
     final options = <int>{correct};
     final spread = difficulty == Difficulty.easy ? 5
         : difficulty == Difficulty.medium ? 10
@@ -92,14 +96,14 @@ class QuestionGenerator {
         : 50;
 
     while (options.length < 4) {
-      int wrong = correct + _random.nextInt(spread * 2 + 1) - spread;
+      int wrong = correct + rng.nextInt(spread * 2 + 1) - spread;
       if (wrong != correct && wrong >= 0) {
         options.add(wrong);
       }
     }
 
     final list = options.toList();
-    list.shuffle(_random);
+    list.shuffle(rng);
     return list;
   }
 

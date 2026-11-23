@@ -13,53 +13,169 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  late AnimationController _logoController;
-  late AnimationController _symbolsController;
+  // Phase 1: Logo entrance (scale + fade in)
+  late AnimationController _logoEntranceController;
   late Animation<double> _logoScale;
   late Animation<double> _logoOpacity;
+
+  // Phase 2: Glow pulse around logo
+  late AnimationController _glowController;
+  late Animation<double> _glowRadius;
+
+  // Phase 3: Brand text slide up + fade
+  late AnimationController _brandController;
+  late Animation<double> _brandSlide;
+  late Animation<double> _brandOpacity;
   late Animation<double> _taglineOpacity;
+
+  // Phase 4: Floating particles
+  late AnimationController _particleController;
+
+  // Phase 5: Exit transition — everything scales up and fades out
+  late AnimationController _exitController;
+  late Animation<double> _exitScale;
+  late Animation<double> _exitOpacity;
+
+  // Background gradient shift
+  late AnimationController _bgController;
+  late Animation<Color?> _bgColor1;
+  late Animation<Color?> _bgColor2;
+
+  // Sparkle particles data
+  final List<_SparkleParticle> _sparkles = [];
+  final _random = Random(42);
 
   @override
   void initState() {
     super.initState();
 
-    _logoController = AnimationController(
+    // Generate sparkle particles
+    for (int i = 0; i < 20; i++) {
+      _sparkles.add(_SparkleParticle(
+        x: _random.nextDouble(),
+        y: _random.nextDouble(),
+        size: 2.0 + _random.nextDouble() * 4.0,
+        speed: 0.3 + _random.nextDouble() * 0.7,
+        delay: _random.nextDouble() * 0.5,
+      ));
+    }
+
+    // === Phase 1: Logo entrance ===
+    _logoEntranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+    _logoScale = Tween<double>(begin: 0.3, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _logoEntranceController,
+        curve: Curves.elasticOut,
+      ),
+    );
+    _logoOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _logoEntranceController,
+        curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
+      ),
+    );
+
+    // === Phase 2: Glow pulse ===
+    _glowController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
-
-    _symbolsController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 3),
-    )..repeat();
-
-    _logoScale = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(parent: _logoController, curve: Curves.elasticOut),
+    _glowRadius = Tween<double>(begin: 0.0, end: 40.0).animate(
+      CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
     );
 
-    _logoOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+    // === Phase 3: Brand text ===
+    _brandController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _brandSlide = Tween<double>(begin: 30.0, end: 0.0).animate(
+      CurvedAnimation(parent: _brandController, curve: Curves.easeOutCubic),
+    );
+    _brandOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
-        parent: _logoController,
-        curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+        parent: _brandController,
+        curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
       ),
     );
-
     _taglineOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
-        parent: _logoController,
-        curve: const Interval(0.5, 1.0, curve: Curves.easeIn),
+        parent: _brandController,
+        curve: const Interval(0.4, 1.0, curve: Curves.easeIn),
       ),
     );
 
-    _logoController.forward();
+    // === Phase 4: Particles ===
+    _particleController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat();
 
-    _navigateAfterDelay();
+    // === Phase 5: Exit ===
+    _exitController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _exitScale = Tween<double>(begin: 1.0, end: 1.3).animate(
+      CurvedAnimation(parent: _exitController, curve: Curves.easeInCubic),
+    );
+    _exitOpacity = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(parent: _exitController, curve: Curves.easeInCubic),
+    );
+
+    // === Background gradient shift ===
+    _bgController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2500),
+    );
+    _bgColor1 = ColorTween(
+      begin: const Color(0xFF6B3EF5),
+      end: const Color(0xFF8C61FF),
+    ).animate(CurvedAnimation(parent: _bgController, curve: Curves.easeInOut));
+    _bgColor2 = ColorTween(
+      begin: const Color(0xFF4A1DB8),
+      end: const Color(0xFF7341FF),
+    ).animate(CurvedAnimation(parent: _bgController, curve: Curves.easeInOut));
+
+    _startSequence();
   }
 
-  Future<void> _navigateAfterDelay() async {
-    await Future.delayed(const Duration(milliseconds: 2500));
+  Future<void> _startSequence() async {
+    // Start background gradient shift
+    _bgController.forward();
+
+    // Phase 1: Logo entrance with slight delay
+    await Future.delayed(const Duration(milliseconds: 200));
+    if (!mounted) return;
+    _logoEntranceController.forward();
+
+    // Phase 2: Glow starts after logo lands
+    await Future.delayed(const Duration(milliseconds: 800));
+    if (!mounted) return;
+    _glowController.forward();
+
+    // Phase 3: Brand text slides up
+    await Future.delayed(const Duration(milliseconds: 400));
+    if (!mounted) return;
+    _brandController.forward();
+
+    // Wait for the full splash duration
+    await Future.delayed(const Duration(milliseconds: 1200));
     if (!mounted) return;
 
+    // Phase 5: Exit animation
+    _exitController.forward();
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (!mounted) return;
+
+    _navigate();
+  }
+
+  void _navigate() {
+    if (!mounted) return;
     if (StorageService.hasSeenOnboarding && StorageService.isLoggedIn) {
       Navigator.of(context).pushReplacementNamed('/main');
     } else if (StorageService.hasSeenOnboarding) {
@@ -71,156 +187,330 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
-    _logoController.dispose();
-    _symbolsController.dispose();
+    _logoEntranceController.dispose();
+    _glowController.dispose();
+    _brandController.dispose();
+    _particleController.dispose();
+    _exitController.dispose();
+    _bgController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.primaryBg,
-      body: Stack(
-        children: [
-          // Animated math symbols background
-          ...List.generate(15, (index) => _FloatingSymbol(
-            controller: _symbolsController,
-            index: index,
-          )),
+    final size = MediaQuery.of(context).size;
 
-          // Main content
-          Center(
-            child: AnimatedBuilder(
-              animation: _logoController,
-              builder: (context, child) {
-                return Opacity(
-                  opacity: _logoOpacity.value,
-                  child: Transform.scale(
-                    scale: _logoScale.value,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Logo icon
-                        Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            gradient: AppColors.accentGradient,
-                            borderRadius: BorderRadius.circular(24),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primaryAccent.withOpacity(0.4),
-                                blurRadius: 30,
-                                spreadRadius: 5,
-                              ),
+    return Scaffold(
+      body: AnimatedBuilder(
+        animation: Listenable.merge([
+          _bgController,
+          _logoEntranceController,
+          _glowController,
+          _brandController,
+          _particleController,
+          _exitController,
+        ]),
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _exitScale.value,
+            child: Opacity(
+              opacity: _exitOpacity.value,
+              child: Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      _bgColor1.value ?? const Color(0xFF6B3EF5),
+                      _bgColor2.value ?? const Color(0xFF4A1DB8),
+                    ],
+                  ),
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // === Soft radial glow behind logo ===
+                    Positioned(
+                      top: size.height * 0.3,
+                      child: Container(
+                        width: 200 + _glowRadius.value * 4,
+                        height: 200 + _glowRadius.value * 4,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              Colors.white.withOpacity(0.12 * _logoOpacity.value),
+                              Colors.white.withOpacity(0.04 * _logoOpacity.value),
+                              Colors.transparent,
                             ],
+                            stops: const [0.0, 0.5, 1.0],
                           ),
-                          child: const Center(
-                            child: Text(
-                              '⚡',
-                              style: TextStyle(fontSize: 48),
+                        ),
+                      ),
+                    ),
+
+                    // === Floating sparkle particles ===
+                    ..._sparkles.map((s) => _buildSparkle(s, size)),
+
+                    // === Main centered content ===
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Spacer(flex: 3),
+
+                        // Logo with glow
+                        Opacity(
+                          opacity: _logoOpacity.value,
+                          child: Transform.scale(
+                            scale: _logoScale.value,
+                            child: Container(
+                              width: 140,
+                              height: 140,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(32),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.white.withOpacity(
+                                      0.25 * _logoOpacity.value,
+                                    ),
+                                    blurRadius: 20 + _glowRadius.value,
+                                    spreadRadius: _glowRadius.value * 0.3,
+                                  ),
+                                  BoxShadow(
+                                    color: const Color(0xFF4A1DB8).withOpacity(0.5),
+                                    blurRadius: 40,
+                                    offset: const Offset(0, 15),
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(32),
+                                child: Image.asset(
+                                  'assets/images/app_icon.png',
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             ),
                           ),
                         ),
 
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 10),
 
-                        // App name
-                        Text(
-                          'NuroPlay',
-                          style: AppTypography.brandHero.copyWith(
-                            fontSize: 44,
-                            color: AppColors.creamText,
-                            shadows: [
-                              Shadow(
-                                color: AppColors.primaryAccent.withOpacity(0.6),
-                                blurRadius: 20,
-                              ),
-                            ],
+                        // Splash logo silhouette (the white logo)
+                        Opacity(
+                          opacity: _logoOpacity.value * 0.9,
+                          child: Transform.scale(
+                            scale: _logoScale.value,
+                            child: Image.asset(
+                              'assets/images/splash_logo.png',
+                              width: 80,
+                              height: 80,
+                              color: Colors.white.withOpacity(0.85),
+                            ),
                           ),
                         ),
 
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 28),
+
+                        // Brand name
+                        Transform.translate(
+                          offset: Offset(0, _brandSlide.value),
+                          child: Opacity(
+                            opacity: _brandOpacity.value,
+                            child: Text(
+                              'NuroPlay',
+                              style: TextStyle(
+                                fontSize: 42,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                                letterSpacing: 1.2,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black.withOpacity(0.3),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                  Shadow(
+                                    color: Colors.white.withOpacity(0.3),
+                                    blurRadius: 30,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
 
                         // Tagline
                         Opacity(
                           opacity: _taglineOpacity.value,
                           child: Text(
                             'Think Fast. Play Smart.',
-                            style: AppTypography.labelLarge.copyWith(
-                              color: AppColors.primaryAccent,
-                              letterSpacing: 1.5,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white.withOpacity(0.75),
+                              letterSpacing: 2.5,
                             ),
                           ),
                         ),
+
+                        const Spacer(flex: 2),
+
+                        // Animated loading dots
+                        _AnimatedLoadingDots(
+                          controller: _particleController,
+                        ),
+
+                        const SizedBox(height: 40),
                       ],
                     ),
-                  ),
-                );
-              },
-            ),
-          ),
 
-          // Loading indicator at bottom
-          Positioned(
-            bottom: 60,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    AppColors.primaryAccent.withOpacity(0.5),
-                  ),
+                    // === Top-left decorative circle ===
+                    Positioned(
+                      top: -40,
+                      left: -40,
+                      child: Opacity(
+                        opacity: _logoOpacity.value * 0.3,
+                        child: Container(
+                          width: 160,
+                          height: 160,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.08),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // === Bottom-right decorative circle ===
+                    Positioned(
+                      bottom: -60,
+                      right: -60,
+                      child: Opacity(
+                        opacity: _logoOpacity.value * 0.2,
+                        child: Container(
+                          width: 200,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.06),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // === Mid-right decorative circle ===
+                    Positioned(
+                      top: size.height * 0.15,
+                      right: -30,
+                      child: Opacity(
+                        opacity: _logoOpacity.value * 0.15,
+                        child: Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.1),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
+          );
+        },
       ),
+    );
+  }
+
+  Widget _buildSparkle(_SparkleParticle s, Size screenSize) {
+    return AnimatedBuilder(
+      animation: _particleController,
+      builder: (context, child) {
+        final t = (_particleController.value * s.speed + s.delay) % 1.0;
+        final fadeIn = (t < 0.3) ? (t / 0.3) : 1.0;
+        final fadeOut = (t > 0.7) ? ((1.0 - t) / 0.3) : 1.0;
+        final alpha = fadeIn * fadeOut * _logoOpacity.value * 0.6;
+
+        return Positioned(
+          left: s.x * screenSize.width + sin(t * pi * 2) * 15,
+          top: s.y * screenSize.height - t * 60,
+          child: Opacity(
+            opacity: alpha.clamp(0.0, 1.0),
+            child: Container(
+              width: s.size,
+              height: s.size,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.5),
+                    blurRadius: s.size * 2,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
 
-/// Floating math symbol for splash background
-class _FloatingSymbol extends StatelessWidget {
-  final AnimationController controller;
-  final int index;
+class _SparkleParticle {
+  final double x;
+  final double y;
+  final double size;
+  final double speed;
+  final double delay;
 
-  const _FloatingSymbol({required this.controller, required this.index});
+  _SparkleParticle({
+    required this.x,
+    required this.y,
+    required this.size,
+    required this.speed,
+    required this.delay,
+  });
+}
+
+/// Animated three-dot loading indicator
+class _AnimatedLoadingDots extends StatelessWidget {
+  final AnimationController controller;
+
+  const _AnimatedLoadingDots({required this.controller});
 
   @override
   Widget build(BuildContext context) {
-    final symbols = ['+', '−', '×', '÷', '=', '∑', 'π', '√', '%', '∞',
-                     '±', '≠', '<', '>', '∫'];
-    final random = Random(index * 42);
-    final size = MediaQuery.of(context).size;
-
-    final startX = random.nextDouble() * size.width;
-    final startY = random.nextDouble() * size.height;
-    final fontSize = 16.0 + random.nextDouble() * 20;
-
     return AnimatedBuilder(
       animation: controller,
-      builder: (context, child) {
-        final t = (controller.value + index * 0.07) % 1.0;
-        return Positioned(
-          left: startX + sin(t * 2 * pi) * 20,
-          top: startY + cos(t * 2 * pi) * 15 - (t * 50),
-          child: Opacity(
-            opacity: (0.08 + sin(t * pi) * 0.07).clamp(0.0, 1.0),
-            child: Text(
-              symbols[index % symbols.length],
-              style: TextStyle(
-                fontSize: fontSize,
-                color: AppColors.primaryAccent,
-                fontWeight: FontWeight.w300,
+      builder: (context, _) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(3, (i) {
+            final phase = (controller.value + i * 0.15) % 1.0;
+            final bounce = sin(phase * pi * 2).abs();
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Transform.translate(
+                offset: Offset(0, -bounce * 6),
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.4 + bounce * 0.4),
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          }),
         );
       },
     );

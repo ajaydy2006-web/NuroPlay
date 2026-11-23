@@ -54,7 +54,6 @@ class _SoloMathScreenState extends State<SoloMathScreen> {
 
   void _submitAnswer(int answer) {
     if (_isProcessing) return;
-    final provider = context.read<GameProvider>();
 
     setState(() {
       _isProcessing = true;
@@ -62,21 +61,25 @@ class _SoloMathScreenState extends State<SoloMathScreen> {
       _showFeedback = true;
     });
 
-    final result = provider.submitSoloAnswer(answer);
-
+    // Show visual feedback on the current question for 350ms before advancing
     Future.delayed(const Duration(milliseconds: 350), () {
       if (!mounted) return;
+
+      final provider = context.read<GameProvider>();
+
+      // Reset feedback state first so the next question is never highlighted
+      setState(() {
+        _selectedAnswer = null;
+        _showFeedback = false;
+        _isProcessing = false;
+        _keypadInput = '';
+      });
+
+      final result = provider.submitSoloAnswer(answer);
 
       if (result != null) {
         _sessionTimer?.cancel();
         Navigator.of(context).pushReplacementNamed('/results', arguments: result);
-      } else {
-        setState(() {
-          _selectedAnswer = null;
-          _showFeedback = false;
-          _isProcessing = false;
-          _keypadInput = '';
-        });
       }
     });
   }
@@ -245,6 +248,7 @@ class _SoloMathScreenState extends State<SoloMathScreen> {
                         final isCorrect = option == currentQ.correctAnswer;
 
                         return AnswerOptionButton(
+                          key: ValueKey('solo_${currentQ.id}_$option'),
                           label: '$option',
                           isSelected: isSelected,
                           isCorrect: isCorrect,

@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'app_typography.dart';
 
-/// MindRush / NuroPlay Material Theme — Electrifying Black & Cerulean Blue
+/// NuroPlay Material Theme — 3D Claymorphic Pastel Lilac & Purple
 class AppTheme {
   AppTheme._();
 
-  static ThemeData get darkTheme => ThemeData(
-        brightness: Brightness.dark,
+  static ThemeData get lightTheme => ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.light,
         scaffoldBackgroundColor: AppColors.primaryBg,
         primaryColor: AppColors.primaryAccent,
-        colorScheme: const ColorScheme.dark(
+        colorScheme: const ColorScheme.light(
           primary: AppColors.primaryAccent,
           secondary: AppColors.secondaryAccent,
           surface: AppColors.cardBg,
@@ -33,8 +34,8 @@ class AppTheme {
           color: AppColors.cardBg,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: AppColors.divider, width: 1),
+            borderRadius: BorderRadius.circular(24),
+            side: const BorderSide(color: Colors.white, width: 1.5),
           ),
         ),
         dividerTheme: const DividerThemeData(
@@ -42,7 +43,7 @@ class AppTheme {
           thickness: 1,
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: AppColors.secondaryBg,
+          backgroundColor: Colors.transparent,
           selectedItemColor: AppColors.primaryAccent,
           unselectedItemColor: AppColors.secondaryText,
           type: BottomNavigationBarType.fixed,
@@ -54,9 +55,9 @@ class AppTheme {
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
             ),
-            textStyle: AppTypography.button.copyWith(color: Colors.white),
+            textStyle: AppTypography.button,
             elevation: 0,
           ),
         ),
@@ -66,7 +67,7 @@ class AppTheme {
             side: const BorderSide(color: AppColors.primaryAccent, width: 1.5),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
             ),
             textStyle: AppTypography.button.copyWith(color: AppColors.primaryAccent),
           ),
@@ -79,38 +80,28 @@ class AppTheme {
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: AppColors.cardBg,
+          fillColor: Colors.white,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             borderSide: const BorderSide(color: AppColors.divider),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             borderSide: const BorderSide(color: AppColors.divider),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             borderSide: const BorderSide(color: AppColors.primaryAccent, width: 2),
           ),
           errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             borderSide: const BorderSide(color: AppColors.error),
           ),
           hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.secondaryText),
           labelStyle: AppTypography.labelSmall,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        ),
-        snackBarTheme: SnackBarThemeData(
-          backgroundColor: AppColors.elevatedCard,
-          contentTextStyle: AppTypography.bodyMedium.copyWith(color: AppColors.primaryText),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          behavior: SnackBarBehavior.floating,
-        ),
-        dialogTheme: DialogTheme(
-          backgroundColor: AppColors.secondaryBg,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          titleTextStyle: AppTypography.heading3,
-          contentTextStyle: AppTypography.bodyMedium,
         ),
       );
+
+  // Alias for backward compatibility
+  static ThemeData get darkTheme => lightTheme;
 }
