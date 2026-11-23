@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/game_models.dart';
@@ -46,11 +47,23 @@ class GameProvider extends ChangeNotifier {
   Difficulty _selectedDifficulty = Difficulty.medium;
   Difficulty get selectedDifficulty => _selectedDifficulty;
 
-  // Bot opponent (duel)
+  // Duel opponent details
   int _botScore = 0;
   int get botScore => _botScore;
-  String _botName = 'MindBot';
-  String get botName => _botName;
+  int get opponentScore => _botScore;
+
+  String _opponentName = 'MindBot';
+  String get botName => _opponentName;
+  String get opponentName => _opponentName;
+
+  String _opponentEmoji = '🤖';
+  String get opponentEmoji => _opponentEmoji;
+
+  bool _isRealOpponent = false;
+  bool get isRealOpponent => _isRealOpponent;
+
+  String? _activeRoomId;
+  String? get activeRoomId => _activeRoomId;
 
   // Daily challenge
   bool _dailyChallengeCompleted = false;
@@ -187,7 +200,15 @@ class GameProvider extends ChangeNotifier {
   // ─── MATH DUEL ───────────────────────────────────────────────
 
   /// Start a new math duel game
-  void startDuel({int questionCount = 10}) {
+  void startDuel({
+    int questionCount = 10,
+    bool isRoomMatch = false,
+    String? opponentName,
+    String? opponentEmoji,
+    String? roomId,
+    int? seed,
+    Difficulty? difficulty,
+  }) {
     _isPlaying = true;
     _score = 0;
     _botScore = 0;
@@ -197,11 +218,26 @@ class GameProvider extends ChangeNotifier {
     _bestGameStreak = 0;
     _currentQuestionIndex = 0;
     _answers = [];
-    _botName = _generateBotName();
+
+    _isRealOpponent = isRoomMatch;
+    _activeRoomId = roomId;
+
+    if (difficulty != null) {
+      _selectedDifficulty = difficulty;
+    }
+
+    if (isRoomMatch) {
+      _opponentName = opponentName ?? 'Rival Player';
+      _opponentEmoji = opponentEmoji ?? '👤';
+    } else {
+      _opponentName = _generateBotName();
+      _opponentEmoji = '🤖';
+    }
 
     _currentQuestions = QuestionGenerator.generateQuestions(
       count: questionCount,
       difficulty: _selectedDifficulty,
+      random: seed != null ? Random(seed) : null,
     );
 
     notifyListeners();
@@ -301,7 +337,7 @@ class GameProvider extends ChangeNotifier {
 
     final result = GameResult(
       gameId: DateTime.now().millisecondsSinceEpoch.toString(),
-      gameType: 'duel',
+      gameType: _isRealOpponent ? 'room_duel' : 'duel',
       difficulty: _selectedDifficulty,
       score: _score,
       totalQuestions: _currentQuestions.length,
@@ -317,7 +353,7 @@ class GameProvider extends ChangeNotifier {
       ratingChange: ratingChange,
       completedAt: DateTime.now(),
       opponentScore: _botScore,
-      opponentName: '$_botName (Bot)',
+      opponentName: _isRealOpponent ? _opponentName : '$_opponentName (Bot)',
       isDuelWin: isDuelWin,
     );
 

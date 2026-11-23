@@ -158,9 +158,10 @@ class _DuelGameScreenState extends State<DuelGameScreen> {
                           child: DuelScoreBar(
                             playerName: provider.profile.username,
                             playerScore: provider.score,
-                            opponentName: provider.botName,
+                            opponentName: provider.opponentName,
                             opponentScore: provider.botScore,
                             playerEmoji: provider.profile.avatarEmoji ?? '🧠',
+                            opponentEmoji: provider.opponentEmoji,
                           ),
                         ),
                       ],

@@ -232,6 +232,7 @@ class DuelScoreBar extends StatelessWidget {
   final String opponentName;
   final int opponentScore;
   final String playerEmoji;
+  final String opponentEmoji;
 
   const DuelScoreBar({
     super.key,
@@ -240,6 +241,7 @@ class DuelScoreBar extends StatelessWidget {
     required this.opponentName,
     required this.opponentScore,
     this.playerEmoji = '🧠',
+    this.opponentEmoji = '🤖',
   });
 
   @override
@@ -314,7 +316,7 @@ class DuelScoreBar extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(width: 8),
-                const Text('🤖', style: TextStyle(fontSize: 20)),
+                Text(opponentEmoji, style: const TextStyle(fontSize: 20)),
               ],
             ),
           ),
