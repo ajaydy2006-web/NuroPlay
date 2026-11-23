@@ -153,8 +153,10 @@ class _ReflexDuelGameState extends State<ReflexDuelGame> {
                         ],
                       ),
                       child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               _isTwoPlayer ? 'PLAYER 2' : 'AI OPPONENT 🤖',
@@ -193,6 +195,7 @@ class _ReflexDuelGameState extends State<ReflexDuelGame> {
                   ),
                 ),
               ),
+            ),
 
               // Middle Control & Status Divider (Polished mahogany / gold strip)
               Container(
@@ -313,8 +316,10 @@ class _ReflexDuelGameState extends State<ReflexDuelGame> {
                       ],
                     ),
                     child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             'PLAYER 1',
@@ -352,6 +357,7 @@ class _ReflexDuelGameState extends State<ReflexDuelGame> {
                   ),
                 ),
               ),
+            ),
             ],
           ),
         ),
@@ -371,9 +377,11 @@ class _ReflexDuelGameState extends State<ReflexDuelGame> {
             ? [const Color(0xFFFCA5A5), const Color(0xFFEF4444), const Color(0xFF991B1B)]
             : [const Color(0xFF64748B), const Color(0xFF334155), const Color(0xFF1E293B)];
 
-    return Container(
-      width: 140,
-      height: 140,
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Container(
+        width: 140,
+        height: 140,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: const LinearGradient(
@@ -423,6 +431,6 @@ class _ReflexDuelGameState extends State<ReflexDuelGame> {
           ),
         ),
       ),
-    );
+    ));
   }
 }
