@@ -802,7 +802,7 @@ class HomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
                   Text(
-                    'Real-World Arcade (10 Games)',
+                    'Real-World Arcade (7 Games)',
                     style: TextStyle(
                       color: Color(0xFF1E1842),
                       fontSize: 16,
@@ -811,7 +811,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 3),
                   Text(
-                    'Carrom, Paper Football, Cup Pong, Jenga & more with 2P mode!',
+                    'Carrom, Paper Plane, Jenga, Reflex Duel & more with 2P mode!',
                     style: TextStyle(
                       color: Color(0xFF8680A6),
                       fontSize: 12,
