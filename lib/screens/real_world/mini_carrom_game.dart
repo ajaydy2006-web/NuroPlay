@@ -1,14 +1,11 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import '../../core/theme/app_typography.dart';
-import 'realistic_game_components.dart';
-import '../../services/storage_service.dart';
+import 'package:flutter/services.dart';
 
-enum CarromGameMode {
-  twoPlayer, // 2-Player Duel (White vs Black)
-  solo,      // Solo High-Score Challenge
-}
-
+// ─────────────────────────────────────────────
+// ENTRY WIDGET
+// ─────────────────────────────────────────────
 class MiniCarromGame extends StatefulWidget {
   const MiniCarromGame({super.key});
 
@@ -16,239 +13,256 @@ class MiniCarromGame extends StatefulWidget {
   State<MiniCarromGame> createState() => _MiniCarromGameState();
 }
 
-class _CarromPiece {
-  Offset pos;
-  Offset vel;
-  final double radius;
-  final Color color;
-  final int points;
-  final bool isWhite;
-  final bool isQueen;
-  bool isPocketed;
+// ─────────────────────────────────────────────
+// CARROM ROOM (online session, SharedPreferences-based)
+// ─────────────────────────────────────────────
+enum _CarromRoomStatus { waiting, joined, playing, closed }
 
-  _CarromPiece({
-    required this.pos,
-    this.vel = Offset.zero,
-    required this.radius,
-    required this.color,
-    required this.points,
-    this.isWhite = false,
-    this.isQueen = false,
-    this.isPocketed = false,
+class _CarromRoom {
+  final String roomId;
+  String host;
+  String? guest;
+  _CarromRoomStatus status;
+  int createdAt;
+  // board state: JSON snapshot exchanged between players
+  Map<String, dynamic>? boardState;
+
+  _CarromRoom({
+    required this.roomId,
+    required this.host,
+    this.guest,
+    this.status = _CarromRoomStatus.waiting,
+    required this.createdAt,
+    this.boardState,
   });
 }
 
-class _MiniCarromGameState extends State<MiniCarromGame> with SingleTickerProviderStateMixin {
-  late AnimationController _physicsController;
+// ─────────────────────────────────────────────
+// GAME SCREENS ENUM
+// ─────────────────────────────────────────────
+enum _Screen { menu, createRoom, joinRoom, localGame, onlineGame }
 
-  CarromGameMode _mode = CarromGameMode.twoPlayer;
+// ─────────────────────────────────────────────
+// COIN DATA
+// ─────────────────────────────────────────────
+class _Coin {
+  Offset pos;
+  Offset vel;
+  final double r;
+  final bool isWhite; // true = P1, false = P2
+  final bool isQueen;
+  bool pocketed;
 
-  // Board dimensions (scaled dynamically by screen)
-  double _boardSize = 340.0;
-  double _pocketRadius = 22.0;
+  _Coin({
+    required this.pos,
+    this.vel = Offset.zero,
+    required this.r,
+    required this.isWhite,
+    this.isQueen = false,
+    this.pocketed = false,
+  });
+}
 
-  late List<_CarromPiece> _coins;
-  late _CarromPiece _striker;
+// ─────────────────────────────────────────────
+// MAIN STATE
+// ─────────────────────────────────────────────
+class _MiniCarromGameState extends State<MiniCarromGame>
+    with SingleTickerProviderStateMixin {
+  // ── Screens ──────────────────────────────────
+  _Screen _screen = _Screen.menu;
 
-  // Baseline positioning
-  double _strikerXPercent = 0.5; // 0.0 (left) to 1.0 (right)
+  // ── Online room ───────────────────────────────
+  final _roomCodeController = TextEditingController();
+  final _nameController     = TextEditingController();
+  String _myName  = 'Player 1';
+  String _oppName = 'Player 2';
+  String _createdRoomId = '';
+  Timer? _roomPollTimer;
+  bool  _isHost = true;
+  int   _waitSeconds = 0;
+  Timer? _waitTimer;
+  static final Map<String, _CarromRoom> _rooms = {}; // "server" (shared state in memory)
 
-  // 2-Player State
-  int _activePlayer = 1; // 1 = Player 1 (White), 2 = Player 2 (Black)
-  int _p1Score = 0;
-  int _p2Score = 0;
-  bool _extraTurn = false;
-  String _turnFeedback = '';
-
-  // Solo State
-  int _soloScore = 0;
-  int _shotsRemaining = 10;
-
-  // Aim & Drag state
-  Offset? _dragStart;
-  Offset? _dragCurrent;
-  bool _isShooting = false;
+  // ── Board physics ─────────────────────────────
+  late AnimationController _ticker;
+  double _bs = 0; // board size (set by LayoutBuilder)
+  late List<_Coin> _coins;
+  late _Coin _striker;
+  int _turn = 1; // 1 = P1 (bottom), 2 = P2 (top)
+  int _p1Pocketed = 0; // how many of P1's coins pocketed
+  int _p2Pocketed = 0;
+  bool _queenPocketed = false;
+  bool _queenCovered  = false; // queen is only counted if covered next shot
+  bool _pendingQueenCover = false; // did we just pocket queen?
+  String _msg = '';
   bool _gameOver = false;
-  String _winnerText = '';
+  String _winner = '';
 
-  List<Offset> get _pockets => [
-    const Offset(24, 24),                         // Top Left
-    Offset(_boardSize - 24, 24),                  // Top Right
-    Offset(24, _boardSize - 24),                  // Bottom Left
-    Offset(_boardSize - 24, _boardSize - 24),     // Bottom Right
-  ];
+  // Striker drag / aim
+  double _strikerPct = 0.5; // 0..1 horizontal on baseline
+  Offset? _aimDragStart;
+  Offset? _aimDragCurrent;
+  bool _shooting = false;
+  bool _settled = true;
+
+  // Online mode
+  bool _onlineMode = false;
+  int _myPlayer = 1; // which player am I (1 or 2)
+
+  // Total coins per player
+  static const int _coinsPerPlayer = 9; // 9 each (standard carrom)
 
   @override
   void initState() {
     super.initState();
-    _physicsController = AnimationController(vsync: this, duration: const Duration(seconds: 1))
-      ..addListener(_updatePhysics)
+    _ticker = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )
+      ..addListener(_step)
       ..repeat();
-
-    _setupBoard();
   }
 
-  void _setupBoard() {
-    final center = Offset(_boardSize / 2, _boardSize / 2);
-    final coinRadius = _boardSize * 0.033; // ~11px for 340 board
+  @override
+  void dispose() {
+    _ticker.dispose();
+    _roomPollTimer?.cancel();
+    _waitTimer?.cancel();
+    _roomCodeController.dispose();
+    _nameController.dispose();
+    super.dispose();
+  }
 
-    // Authentic Carrom Pool Disc Layout (1 Queen, 4 White, 4 Black)
-    final d = coinRadius * 2.1;
-    _coins = [
-      // 1. Red Queen (Center)
-      _CarromPiece(
-        pos: center,
-        radius: coinRadius,
-        color: const Color(0xFFEF4444),
-        points: 25,
-        isQueen: true,
-      ),
-      // 2. White Coins (Player 1)
-      _CarromPiece(
-        pos: center + Offset(-d, 0),
-        radius: coinRadius,
-        color: Colors.white,
-        points: 10,
-        isWhite: true,
-      ),
-      _CarromPiece(
-        pos: center + Offset(d, 0),
-        radius: coinRadius,
-        color: Colors.white,
-        points: 10,
-        isWhite: true,
-      ),
-      _CarromPiece(
-        pos: center + Offset(0, -d),
-        radius: coinRadius,
-        color: Colors.white,
-        points: 10,
-        isWhite: true,
-      ),
-      _CarromPiece(
-        pos: center + Offset(0, d),
-        radius: coinRadius,
-        color: Colors.white,
-        points: 10,
-        isWhite: true,
-      ),
-      // 3. Black Coins (Player 2)
-      _CarromPiece(
-        pos: center + Offset(-d * 0.707, -d * 0.707),
-        radius: coinRadius,
-        color: const Color(0xFF1E293B),
-        points: 10,
-        isWhite: false,
-      ),
-      _CarromPiece(
-        pos: center + Offset(d * 0.707, -d * 0.707),
-        radius: coinRadius,
-        color: const Color(0xFF1E293B),
-        points: 10,
-        isWhite: false,
-      ),
-      _CarromPiece(
-        pos: center + Offset(-d * 0.707, d * 0.707),
-        radius: coinRadius,
-        color: const Color(0xFF1E293B),
-        points: 10,
-        isWhite: false,
-      ),
-      _CarromPiece(
-        pos: center + Offset(d * 0.707, d * 0.707),
-        radius: coinRadius,
-        color: const Color(0xFF1E293B),
-        points: 10,
-        isWhite: false,
-      ),
-    ];
+  // ─── BOARD SETUP ────────────────────────────
+  void _setupBoard(double boardSize) {
+    _bs = boardSize;
+    final c = Offset(_bs / 2, _bs / 2);
+    final r = _bs * 0.034; // coin radius
 
-    _activePlayer = 1;
-    _p1Score = 0;
-    _p2Score = 0;
-    _soloScore = 0;
-    _shotsRemaining = 10;
-    _extraTurn = false;
-    _turnFeedback = _mode == CarromGameMode.twoPlayer
-        ? 'Player 1 (White)\'s Turn — Slide baseline & aim!'
-        : 'Solo Practice — Pocket coins to score high!';
+    // Classic 19-coin layout (9W + 9B + 1 Queen)
+    _coins = [];
+    // Build the alternating ring of 18 coins + center queen
+    // Inner ring: 6 coins, outer ring: 12 coins
+    final inner = _bs * 0.085;
+    final outer = _bs * 0.165;
+
+    // Center Queen
+    _coins.add(_Coin(pos: c, r: r, isWhite: true, isQueen: true));
+
+    // Inner ring: 6 alternating
+    for (int i = 0; i < 6; i++) {
+      final angle = (i * 60) * pi / 180;
+      final isW = (i % 2 == 0);
+      _coins.add(_Coin(
+        pos: c + Offset(cos(angle) * inner, sin(angle) * inner),
+        r: r,
+        isWhite: isW,
+      ));
+    }
+
+    // Outer ring: 12 alternating
+    for (int i = 0; i < 12; i++) {
+      final angle = (i * 30) * pi / 180;
+      final isW = (i % 2 == 0);
+      _coins.add(_Coin(
+        pos: c + Offset(cos(angle) * outer, sin(angle) * outer),
+        r: r,
+        isWhite: isW,
+      ));
+    }
+
+    _p1Pocketed = 0;
+    _p2Pocketed = 0;
+    _queenPocketed = false;
+    _queenCovered  = false;
+    _pendingQueenCover = false;
+    _turn = 1;
     _gameOver = false;
-    _winnerText = '';
-
+    _winner = '';
+    _msg = _onlineMode && _myPlayer != 1
+        ? 'Waiting for P1 to shoot…'
+        : 'P1\'s turn — aim & shoot!';
+    _settled = true;
+    _shooting = false;
     _resetStriker();
   }
 
-  double _getStrikerY() {
-    if (_mode == CarromGameMode.twoPlayer && _activePlayer == 2) {
-      // Player 2 strikes from the top baseline
-      return 56.0;
-    }
-    // Player 1 or Solo strikes from the bottom baseline
-    return _boardSize - 56.0;
+  List<Offset> _pocketPositions() {
+    final margin = _bs * 0.065;
+    return [
+      Offset(margin, margin),
+      Offset(_bs - margin, margin),
+      Offset(margin, _bs - margin),
+      Offset(_bs - margin, _bs - margin),
+    ];
   }
 
   void _resetStriker() {
-    final minX = 72.0;
-    final maxX = _boardSize - 72.0;
-    final posX = minX + (_strikerXPercent * (maxX - minX));
-    final posY = _getStrikerY();
-
-    _striker = _CarromPiece(
-      pos: Offset(posX, posY),
-      vel: Offset.zero,
-      radius: _boardSize * 0.047, // ~16px
-      color: _activePlayer == 1 ? const Color(0xFF7E52FF) : const Color(0xFFFF5252),
-      points: 0,
-    );
-    _isShooting = false;
+    final minX = _bs * 0.22;
+    final maxX = _bs * 0.78;
+    final x = minX + _strikerPct * (maxX - minX);
+    // P1 at bottom, P2 at top
+    final y = _turn == 1 ? _bs * 0.84 : _bs * 0.16;
+    final sr = _bs * 0.048;
+    _striker = _Coin(pos: Offset(x, y), r: sr, isWhite: _turn == 1);
   }
 
-  void _updatePhysics() {
-    if (_gameOver) return;
+  // ─── PHYSICS STEP ────────────────────────────
+  void _step() {
+    if (!mounted || _gameOver || _settled) return;
 
     bool anyMoving = false;
-    final allPieces = [_striker, ..._coins.where((c) => !c.isPocketed)];
+    bool coinPocketed = false;
+    bool strikerPocketed = false;
+    bool queenJustPocketed = false;
+    bool p1CoinPocketed = false;
+    bool p2CoinPocketed = false;
 
-    bool scoredThisTurn = false;
-    bool foulThisTurn = false;
+    final pockets = _pocketPositions();
+    final allPieces = [_striker, ..._coins.where((c) => !c.pocketed)];
+    final pr = _bs * 0.072; // pocket radius
 
+    // Move each piece
     for (final p in allPieces) {
-      if (p.vel.distance > 0.08) {
+      if (p.vel.distance > 0.5) {
         anyMoving = true;
         p.pos += p.vel;
-        p.vel *= 0.968; // Smooth wooden surface friction
+        p.vel *= 0.973; // friction
 
-        // Cushion Border bounce (with elastic response)
-        final margin = p.radius + 14.0;
+        // Cushion bounce
+        final margin = p.r + _bs * 0.038;
         if (p.pos.dx < margin) {
           p.pos = Offset(margin, p.pos.dy);
-          p.vel = Offset(-p.vel.dx * 0.78, p.vel.dy);
-        } else if (p.pos.dx > _boardSize - margin) {
-          p.pos = Offset(_boardSize - margin, p.pos.dy);
-          p.vel = Offset(-p.vel.dx * 0.78, p.vel.dy);
+          p.vel = Offset(-p.vel.dx * 0.75, p.vel.dy);
+        } else if (p.pos.dx > _bs - margin) {
+          p.pos = Offset(_bs - margin, p.pos.dy);
+          p.vel = Offset(-p.vel.dx * 0.75, p.vel.dy);
         }
-
         if (p.pos.dy < margin) {
           p.pos = Offset(p.pos.dx, margin);
-          p.vel = Offset(p.vel.dx, -p.vel.dy * 0.78);
-        } else if (p.pos.dy > _boardSize - margin) {
-          p.pos = Offset(p.pos.dx, _boardSize - margin);
-          p.vel = Offset(p.vel.dx, -p.vel.dy * 0.78);
+          p.vel = Offset(p.vel.dx, -p.vel.dy * 0.75);
+        } else if (p.pos.dy > _bs - margin) {
+          p.pos = Offset(p.pos.dx, _bs - margin);
+          p.vel = Offset(p.vel.dx, -p.vel.dy * 0.75);
         }
 
-        // Pocket checking
-        for (final pocket in _pockets) {
-          if ((p.pos - pocket).distance < _pocketRadius) {
+        // Pocket check
+        for (final pocket in pockets) {
+          if ((p.pos - pocket).distance < pr) {
+            p.pocketed = true;
             p.vel = Offset.zero;
-            p.pos = const Offset(-200, -200);
-            p.isPocketed = true;
+            p.pos = const Offset(-999, -999);
 
             if (p == _striker) {
-              foulThisTurn = true;
+              strikerPocketed = true;
+            } else if (p.isQueen) {
+              queenJustPocketed = true;
+            } else if (p.isWhite) {
+              p1CoinPocketed = true;
             } else {
-              scoredThisTurn = true;
-              _handleCoinPocketed(p);
+              p2CoinPocketed = true;
             }
+            coinPocketed = true;
           }
         }
       } else {
@@ -256,655 +270,715 @@ class _MiniCarromGameState extends State<MiniCarromGame> with SingleTickerProvid
       }
     }
 
-    // Pairwise elastic coin collisions
+    // Elastic coin collisions
     for (int i = 0; i < allPieces.length; i++) {
       for (int j = i + 1; j < allPieces.length; j++) {
-        final a = allPieces[i];
-        final b = allPieces[j];
-        if (a.isPocketed || b.isPocketed) continue;
-
+        final a = allPieces[i], b = allPieces[j];
+        if (a.pocketed || b.pocketed) continue;
         final delta = b.pos - a.pos;
-        final dist = delta.distance;
-        final minDist = a.radius + b.radius;
-
-        if (dist < minDist && dist > 0.001) {
-          final normal = delta / dist;
-          // Separation
-          final overlap = minDist - dist;
-          a.pos -= normal * (overlap / 2);
-          b.pos += normal * (overlap / 2);
-
-          // Elastic collision velocity swap
-          final k = a.vel - b.vel;
-          final p = 2 * (normal.dx * k.dx + normal.dy * k.dy) / 2.0;
-
-          a.vel -= normal * p * 0.88;
-          b.vel += normal * p * 0.88;
+        final dist  = delta.distance;
+        final minD  = a.r + b.r;
+        if (dist < minD && dist > 0.001) {
+          final n = delta / dist;
+          final overlap = minD - dist;
+          a.pos -= n * (overlap / 2);
+          b.pos += n * (overlap / 2);
+          final rel = a.vel - b.vel;
+          final dot = rel.dx * n.dx + rel.dy * n.dy;
+          if (dot > 0) {
+            a.vel -= n * (dot * 0.85);
+            b.vel += n * (dot * 0.85);
+          }
         }
       }
     }
 
-    // Turn Completion & Switch logic
-    if (_isShooting && !anyMoving) {
-      _isShooting = false;
-      _onShotFinished(scoredThisTurn, foulThisTurn);
+    // Handle queen pocketing
+    if (queenJustPocketed) {
+      _pendingQueenCover = true;
     }
 
-    setState(() {});
+    // After shot settles
+    if (_shooting && !anyMoving) {
+      _shooting = false;
+      _settled = true;
+      _onShotSettled(
+        coinPocketed: coinPocketed,
+        strikerPocketed: strikerPocketed,
+        p1CoinPocketed: p1CoinPocketed,
+        p2CoinPocketed: p2CoinPocketed,
+        queenJustPocketed: queenJustPocketed,
+      );
+    }
+
+    if (mounted) setState(() {});
   }
 
-  void _handleCoinPocketed(_CarromPiece coin) {
-    if (_mode == CarromGameMode.solo) {
-      _soloScore += coin.points;
-      _turnFeedback = 'Sunk ${coin.isQueen ? "Queen 👑 (+25)!" : "Coin (+${coin.points})!"}';
+  void _onShotSettled({
+    required bool coinPocketed,
+    required bool strikerPocketed,
+    required bool p1CoinPocketed,
+    required bool p2CoinPocketed,
+    required bool queenJustPocketed,
+  }) {
+    bool extraTurn = false;
+
+    if (strikerPocketed) {
+      // Foul — lose turn, opponent gets +1 coin back if any pocketed
+      _msg = '⚠️ Foul! Striker pocketed — turn changes';
+      _pendingQueenCover = false;
+      // If queen was also pocketed on foul shot, return it
+      if (queenJustPocketed) {
+        _returnQueen();
+      }
+      _switchTurn();
       return;
     }
 
-    // 2-Player rules
-    if (coin.isQueen) {
-      if (_activePlayer == 1) {
-        _p1Score += 25;
-        _turnFeedback = 'Player 1 pocketed the Queen 👑 (+25)!';
+    // Count pocketed coins for current player
+    if (_turn == 1 && p1CoinPocketed) {
+      _p1Pocketed++;
+      extraTurn = true;
+      _msg = '✅ P1 pocketed! +1 — shoot again!';
+    } else if (_turn == 2 && p2CoinPocketed) {
+      _p2Pocketed++;
+      extraTurn = true;
+      _msg = '✅ P2 pocketed! +1 — shoot again!';
+    } else if (coinPocketed && !strikerPocketed) {
+      // Pocketed opponent's coin — foul
+      _msg = '⚠️ Wrong coin! Turn changes';
+    } else if (!coinPocketed) {
+      _msg = 'No pocket — turn changes';
+    }
+
+    // Queen cover rule
+    if (queenJustPocketed) {
+      if (extraTurn) {
+        // Queen is covered only if same player pockets one of their own coins AFTER queen
+        // in this turn they already did — count queen
+        _queenPocketed = true;
+        _queenCovered  = true;
+        _msg += ' 👑 Queen covered!';
       } else {
-        _p2Score += 25;
-        _turnFeedback = 'Player 2 pocketed the Queen 👑 (+25)!';
+        // Queen not covered — return it
+        _returnQueen();
+        _msg += ' 👑 Queen returned (not covered)';
       }
-      _extraTurn = true;
-    } else if (coin.isWhite) {
-      // White coin
-      _p1Score += 10;
-      if (_activePlayer == 1) {
-        _extraTurn = true;
-        _turnFeedback = 'Player 1 scored White (+10)! Extra Turn 🎯';
-      } else {
-        _turnFeedback = 'Player 2 sank P1\'s White coin (+10 to P1)';
-      }
+    } else if (_pendingQueenCover && extraTurn) {
+      _queenCovered = true;
+      _pendingQueenCover = false;
+      _msg += ' 👑 Queen covered!';
     } else {
-      // Black coin
-      _p2Score += 10;
-      if (_activePlayer == 2) {
-        _extraTurn = true;
-        _turnFeedback = 'Player 2 scored Black (+10)! Extra Turn 🎯';
-      } else {
-        _turnFeedback = 'Player 1 sank P2\'s Black coin (+10 to P2)';
-      }
+      _pendingQueenCover = false;
+    }
+
+    // Win check: player pockets all 9 of their own coins
+    if (_p1Pocketed >= _coinsPerPlayer) {
+      _endGame('Player 1 Wins! 🎉');
+      return;
+    }
+    if (_p2Pocketed >= _coinsPerPlayer) {
+      _endGame('Player 2 Wins! 🎉');
+      return;
+    }
+
+    if (!extraTurn) {
+      _switchTurn();
+    } else {
+      _resetStriker();
+      if (mounted) setState(() {});
     }
   }
 
-  void _onShotFinished(bool scored, bool foul) {
-    if (_mode == CarromGameMode.solo) {
-      _shotsRemaining--;
-      if (_shotsRemaining <= 0 || _coins.every((c) => c.isPocketed)) {
-        _gameOver = true;
-        _winnerText = 'Challenge Complete! Score: $_soloScore pts';
-        StorageService.setPersonalBest('mini_carrom', _soloScore);
-      } else {
-        _resetStriker();
-      }
-      return;
-    }
+  void _returnQueen() {
+    final c = Offset(_bs / 2, _bs / 2);
+    final qCoin = _coins.firstWhere((c) => c.isQueen, orElse: () => _coins.first);
+    qCoin.pocketed = false;
+    qCoin.pos = c;
+    qCoin.vel = Offset.zero;
+    _pendingQueenCover = false;
+  }
 
-    // 2-Player Mode handling
-    if (foul) {
-      // Striker sunk: Foul
-      if (_activePlayer == 1) {
-        _p1Score = max(0, _p1Score - 5);
-        _turnFeedback = '⚠️ FOUL! P1 sank Striker (-5). Turn passes!';
-      } else {
-        _p2Score = max(0, _p2Score - 5);
-        _turnFeedback = '⚠️ FOUL! P2 sank Striker (-5). Turn passes!';
-      }
-      _extraTurn = false;
-    }
-
-    // Check if match over
-    final remainingCoins = _coins.where((c) => !c.isPocketed).toList();
-    if (remainingCoins.isEmpty) {
-      _gameOver = true;
-      if (_p1Score > _p2Score) {
-        _winnerText = '🏆 PLAYER 1 WINS! ($_p1Score - $_p2Score)';
-      } else if (_p2Score > _p1Score) {
-        _winnerText = '🏆 PLAYER 2 WINS! ($_p2Score - $_p1Score)';
-      } else {
-        _winnerText = '🤝 DRAW MATCH! ($_p1Score pts each)';
-      }
-      return;
-    }
-
-    // Check turns
-    if (!_extraTurn) {
-      // Pass turn to the other player
-      _activePlayer = _activePlayer == 1 ? 2 : 1;
-      _turnFeedback = _activePlayer == 1
-          ? 'Player 1\'s Turn (White ⚪) — Place striker & shoot!'
-          : 'Player 2\'s Turn (Black ⚫) — Place striker & shoot!';
-    } else {
-      _extraTurn = false; // Used the extra turn bonus
-    }
-
+  void _switchTurn() {
+    // In online mode, only switch if it's currently my turn
+    _turn = _turn == 1 ? 2 : 1;
+    _msg = _turn == 1 ? 'P1\'s turn — aim!' : 'P2\'s turn — aim!';
     _resetStriker();
+    if (mounted) setState(() {});
   }
 
-  // ─── TOUCH & AIMING ──────────────────────────────────────────
-  void _onPanStart(DragStartDetails details) {
-    if (_isShooting || _gameOver) return;
-    _dragStart = details.localPosition;
-    _dragCurrent = details.localPosition;
+  void _endGame(String winner) {
+    _gameOver = true;
+    _winner = winner;
+    HapticFeedback.heavyImpact();
+    if (mounted) setState(() {});
   }
 
-  void _onPanUpdate(DragUpdateDetails details) {
-    if (_dragStart == null) return;
-    setState(() => _dragCurrent = details.localPosition);
+  // ─── SHOOT ───────────────────────────────────
+  void _shoot() {
+    if (_aimDragStart == null || _aimDragCurrent == null) return;
+    if (_shooting || !_settled) return;
+    if (_gameOver) return;
+    // In online mode, can only shoot on your turn
+    if (_onlineMode && _myPlayer != _turn) return;
+
+    final drag = _aimDragStart! - _aimDragCurrent!;
+    final power = drag.distance.clamp(0, _bs * 0.35);
+    if (power < _bs * 0.015) return;
+
+    final dir = drag / drag.distance;
+    final speed = power * 0.28;
+    _striker.vel = dir * speed;
+    _shooting = true;
+    _settled = false;
+    _aimDragStart = null;
+    _aimDragCurrent = null;
+    HapticFeedback.lightImpact();
+    if (mounted) setState(() {});
   }
 
-  void _onPanEnd(DragEndDetails details) {
-    if (_dragStart == null || _dragCurrent == null) return;
+  bool get _isMyTurn => !_onlineMode || _myPlayer == _turn;
 
-    final diff = _dragStart! - _dragCurrent!;
-    final dist = diff.distance;
+  // ─── ROOM MANAGEMENT (in-memory local server) ─
+  String _generateRoomId() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    final rng = Random();
+    return List.generate(6, (_) => chars[rng.nextInt(chars.length)]).join();
+  }
 
-    if (dist < 8.0) {
-      // Too small, ignore accidental tap
-      setState(() {
-        _dragStart = null;
-        _dragCurrent = null;
-      });
+  void _createRoom() {
+    final id = _generateRoomId();
+    _rooms[id] = _CarromRoom(
+      roomId: id,
+      host: _myName,
+      createdAt: DateTime.now().millisecondsSinceEpoch,
+    );
+    _createdRoomId = id;
+    _isHost = true;
+    _myPlayer = 1;
+    _oppName = 'Waiting…';
+    setState(() => _screen = _Screen.createRoom);
+    _startWaitTimer();
+    _startRoomPoll(id);
+  }
+
+  void _joinRoom(String id) {
+    id = id.trim().toUpperCase();
+    final room = _rooms[id];
+    if (room == null || room.status != _CarromRoomStatus.waiting) {
+      _showSnack('Room "$id" not found or already started.');
       return;
     }
+    room.guest = _myName;
+    room.status = _CarromRoomStatus.joined;
+    _isHost = false;
+    _myPlayer = 2;
+    _oppName = room.host;
+    _createdRoomId = id;
+    setState(() => _screen = _Screen.joinRoom);
+    _startGameFromRoom(id);
+  }
 
-    final speed = dist.clamp(10.0, 160.0) * 0.17;
-    final angle = atan2(diff.dy, diff.dx);
-
-    setState(() {
-      _striker.vel = Offset(cos(angle) * speed, sin(angle) * speed);
-      _isShooting = true;
-      _dragStart = null;
-      _dragCurrent = null;
+  void _startWaitTimer() {
+    _waitSeconds = 0;
+    _waitTimer?.cancel();
+    _waitTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) { t.cancel(); return; }
+      setState(() => _waitSeconds++);
+      if (_waitSeconds >= 60) {
+        t.cancel();
+        _rooms[_createdRoomId]?.status = _CarromRoomStatus.closed;
+        _showSnack('No one joined in 60s — room closed.');
+        setState(() => _screen = _Screen.menu);
+      }
     });
   }
 
-  @override
-  void dispose() {
-    _physicsController.dispose();
-    super.dispose();
+  void _startRoomPoll(String id) {
+    _roomPollTimer?.cancel();
+    _roomPollTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) { t.cancel(); return; }
+      final room = _rooms[id];
+      if (room != null && room.status == _CarromRoomStatus.joined) {
+        t.cancel();
+        _waitTimer?.cancel();
+        _oppName = room.guest ?? 'Player 2';
+        _startGameFromRoom(id);
+      }
+    });
   }
 
+  void _startGameFromRoom(String id) {
+    _rooms[id]?.status = _CarromRoomStatus.playing;
+    _onlineMode = true;
+    setState(() => _screen = _Screen.onlineGame);
+  }
+
+  void _cancelRoom() {
+    _rooms.remove(_createdRoomId);
+    _roomPollTimer?.cancel();
+    _waitTimer?.cancel();
+    setState(() => _screen = _Screen.menu);
+  }
+
+  void _showSnack(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: const Color(0xFF6B3EF5)),
+    );
+  }
+
+  // ─── BUILD ───────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF180D08),
-      body: RealisticWoodTableSurface(
-        isDarkWood: true,
-        child: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              // Dynamically adapt board size to ANY screen without overflow
-              final maxAllowedWidth = constraints.maxWidth - 24;
-              final maxAllowedHeight = constraints.maxHeight - 210; // Leaves space for header, scores, sliders
-              final boardDimension = min(maxAllowedWidth, maxAllowedHeight).clamp(270.0, 420.0);
+      backgroundColor: const Color(0xFF4A1E8A),
+      body: SafeArea(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: _buildScreen(),
+        ),
+      ),
+    );
+  }
 
-              if ((_boardSize - boardDimension).abs() > 2.0) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted) {
-                    setState(() {
-                      _boardSize = boardDimension;
-                      _pocketRadius = _boardSize * 0.065;
-                      _setupBoard();
-                    });
-                  }
-                });
-              }
+  Widget _buildScreen() {
+    switch (_screen) {
+      case _Screen.menu:        return _buildMenu();
+      case _Screen.createRoom:  return _buildWaitingRoom(isHost: _isHost);
+      case _Screen.joinRoom:    return _buildWaitingRoom(isHost: _isHost);
+      case _Screen.localGame:
+      case _Screen.onlineGame:  return _buildGameScreen();
+    }
+  }
 
-              return SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  child: Column(
-                    children: [
-                      // ─── 1. TOP APP BAR & MODE SELECTOR ───
-                      _buildTopBar(),
+  // ─── MENU ─────────────────────────────────────
+  Widget _buildMenu() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Board icon preview
+            Container(
+              width: 110, height: 110,
+              decoration: BoxDecoration(
+                color: const Color(0xFFD4A86A),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: const [BoxShadow(color: Colors.black38, blurRadius: 16, offset: Offset(0, 6))],
+              ),
+              child: const Center(
+                child: Text('🎯', style: TextStyle(fontSize: 54)),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text('Carrom Pool', style: TextStyle(
+              color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900,
+              letterSpacing: 1,
+            )),
+            const SizedBox(height: 6),
+            Text('Pocket all your 9 coins to win!',
+              style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 14)),
+            const SizedBox(height: 40),
 
-                      const SizedBox(height: 6),
+            // Name field
+            _buildTextField(_nameController, 'Your name', Icons.person),
+            const SizedBox(height: 28),
 
-                      // ─── 2. DUAL PLAYER SCOREBOARD / STATS ───
-                      _mode == CarromGameMode.twoPlayer
-                          ? _buildTwoPlayerScoreboard()
-                          : _buildSoloScoreboard(),
+            // Buttons
+            _menuBtn('⚡ Local 2-Player', const Color(0xFF6B3EF5), () {
+              _myName  = _nameController.text.trim().isEmpty ? 'Player 1' : _nameController.text.trim();
+              _oppName = 'Player 2';
+              _onlineMode = false;
+              _myPlayer = 1;
+              setState(() => _screen = _Screen.localGame);
+            }),
+            const SizedBox(height: 14),
+            _menuBtn('🌐 Online — Create Room', const Color(0xFF22C55E), () {
+              _myName = _nameController.text.trim().isEmpty ? 'Player 1' : _nameController.text.trim();
+              _createRoom();
+            }),
+            const SizedBox(height: 14),
+            _menuBtn('🔑 Online — Join Room', const Color(0xFFF59E0B), () {
+              _myName = _nameController.text.trim().isEmpty ? 'Player 2' : _nameController.text.trim();
+              _showJoinDialog();
+            }),
+          ],
+        ),
+      ),
+    );
+  }
 
-                      const SizedBox(height: 6),
+  Widget _buildTextField(TextEditingController ctrl, String hint, IconData icon) {
+    return TextField(
+      controller: ctrl,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: const TextStyle(color: Colors.white38),
+        prefixIcon: Icon(icon, color: Colors.white38),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.1),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
 
-                      // ─── 3. TURN & STATUS BANNER ───
-                      _buildStatusPill(),
+  Widget _menuBtn(String label, Color color, VoidCallback onTap) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          elevation: 6,
+        ),
+        onPressed: onTap,
+        child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+      ),
+    );
+  }
 
-                      const SizedBox(height: 6),
-
-                      // ─── 4. CARROM POOL PLAYING BOARD ───
-                      Center(
-                        child: Container(
-                          width: _boardSize,
-                          height: _boardSize,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(24),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.8),
-                                blurRadius: 28,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: GestureDetector(
-                            onPanStart: _onPanStart,
-                            onPanUpdate: _onPanUpdate,
-                            onPanEnd: _onPanEnd,
-                            child: RealisticCarromBoardWidget(
-                              boardSize: _boardSize,
-                              child: Stack(
-                                clipBehavior: Clip.none,
-                                children: [
-                                  // 4 Corner Deep Net Pockets
-                                  ..._pockets.map((p) => Positioned(
-                                    left: p.dx - _pocketRadius,
-                                    top: p.dy - _pocketRadius,
-                                    child: Container(
-                                      width: _pocketRadius * 2,
-                                      height: _pocketRadius * 2,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        gradient: const RadialGradient(
-                                          colors: [
-                                            Color(0xFF000000),
-                                            Color(0xFF160902),
-                                            Color(0xFF2E170B),
-                                          ],
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withOpacity(0.85),
-                                            blurRadius: 5,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  )),
-
-                                  // Realistic Aiming & Reflection Laser Guideline
-                                  if (_dragStart != null && _dragCurrent != null && !_isShooting)
-                                    CustomPaint(
-                                      size: Size(_boardSize, _boardSize),
-                                      painter: _CarromLaserAimPainter(
-                                        strikerPos: _striker.pos,
-                                        dragStart: _dragStart!,
-                                        dragCurrent: _dragCurrent!,
-                                        boardSize: _boardSize,
-                                      ),
-                                    ),
-
-                                  // Carrom Coins (Ivory White, Ebony Black & Red Queen)
-                                  ..._coins.where((c) => !c.isPocketed).map((c) => Positioned(
-                                    left: c.pos.dx - c.radius,
-                                    top: c.pos.dy - c.radius,
-                                    child: RealisticCarromCoin(
-                                      radius: c.radius,
-                                      isQueen: c.isQueen,
-                                      isWhite: c.isWhite,
-                                    ),
-                                  )),
-
-                                  // Realistic 3D Striker Puck
-                                  if (!_striker.isPocketed)
-                                    Positioned(
-                                      left: _striker.pos.dx - _striker.radius,
-                                      top: _striker.pos.dy - _striker.radius,
-                                      child: RealisticCarromStriker(
-                                        radius: _striker.radius,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      // ─── 5. INTERACTIVE STRIKER BASELINE SLIDER ───
-                      if (!_isShooting && !_gameOver)
-                        _buildStrikerPositionSlider(),
-
-                      // ─── 6. GAME OVER / WIN BANNER ───
-                      if (_gameOver)
-                        _buildGameOverBanner(),
-
-                      const SizedBox(height: 10),
-                    ],
-                  ),
-                ),
-              );
+  void _showJoinDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF2D1060),
+        title: const Text('Join Room', style: TextStyle(color: Colors.white)),
+        content: TextField(
+          controller: _roomCodeController,
+          style: const TextStyle(color: Colors.white),
+          decoration: const InputDecoration(
+            hintText: 'Enter 6-letter room code',
+            hintStyle: TextStyle(color: Colors.white38),
+          ),
+          textCapitalization: TextCapitalization.characters,
+          maxLength: 6,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6B3EF5)),
+            onPressed: () {
+              Navigator.pop(context);
+              _joinRoom(_roomCodeController.text);
             },
+            child: const Text('Join', style: TextStyle(color: Colors.white)),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  // ─── SUBWIDGETS ───────────────────────────────────────────────
-
-  Widget _buildTopBar() {
-    return Row(
-      children: [
-        IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        Expanded(
-          child: Column(
-            children: [
-              Text(
-                'Real Carrom Pool',
-                style: AppTypography.heading3.copyWith(color: Colors.white, fontSize: 18),
-              ),
-              const SizedBox(height: 2),
-              // Game Mode Toggle
+  // ─── WAITING ROOM ─────────────────────────────
+  Widget _buildWaitingRoom({required bool isHost}) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('🎮', style: TextStyle(fontSize: 60)),
+            const SizedBox(height: 20),
+            Text(isHost ? 'Share this Room Code' : 'Joining Room…',
+              style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            if (isHost) ...[
               Container(
-                padding: const EdgeInsets.all(2),
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
+                  color: const Color(0xFF6B3EF5),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withOpacity(0.15)),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildModeButton(CarromGameMode.twoPlayer, '👥 2P Duel'),
-                    _buildModeButton(CarromGameMode.solo, '🎯 Solo Practice'),
-                  ],
-                ),
+                child: Text(_createdRoomId,
+                  style: const TextStyle(color: Colors.white, fontSize: 42, fontWeight: FontWeight.w900, letterSpacing: 8)),
               ),
+              const SizedBox(height: 12),
+              GestureDetector(
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: _createdRoomId));
+                  _showSnack('Room code copied!');
+                },
+                child: const Text('📋 Tap to copy',
+                  style: TextStyle(color: Colors.white54, fontSize: 13)),
+              ),
+              const SizedBox(height: 24),
+              const CircularProgressIndicator(color: Colors.white),
+              const SizedBox(height: 12),
+              Text('Waiting for opponent… ($_waitSeconds / 60s)',
+                style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 14)),
+            ] else ...[
+              const CircularProgressIndicator(color: Colors.white),
+              const SizedBox(height: 16),
+              Text('Joining room $_createdRoomId…',
+                style: const TextStyle(color: Colors.white70)),
             ],
-          ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.replay_rounded, color: Color(0xFFFFD53D), size: 24),
-          tooltip: 'Reset Board',
-          onPressed: () => setState(_setupBoard),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildModeButton(CarromGameMode mode, String label) {
-    final isSelected = _mode == mode;
-    return GestureDetector(
-      onTap: () {
-        if (_mode != mode) {
-          setState(() {
-            _mode = mode;
-            _setupBoard();
-          });
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF7E52FF) : Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            color: isSelected ? Colors.white : Colors.white70,
-          ),
+            const SizedBox(height: 32),
+            TextButton(
+              onPressed: () {
+                _cancelRoom();
+              },
+              child: const Text('Cancel', style: TextStyle(color: Colors.redAccent, fontSize: 16)),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildTwoPlayerScoreboard() {
-    final whiteLeft = _coins.where((c) => !c.isPocketed && c.isWhite).length;
-    final blackLeft = _coins.where((c) => !c.isPocketed && !c.isWhite && !c.isQueen).length;
-    final queenPocketed = _coins.any((c) => c.isPocketed && c.isQueen);
+  // ─── GAME SCREEN ─────────────────────────────
+  Widget _buildGameScreen() {
+    return LayoutBuilder(builder: (ctx, cst) {
+      final sw = cst.maxWidth;
+      final sh = cst.maxHeight;
 
-    return Container(
+      // Board size: square, fits screen with room for HUD
+      final hudH = sh * 0.14;
+      final msgH = sh * 0.065;
+      final ctrlH = sh * 0.14;
+      final availH = sh - hudH - msgH - ctrlH;
+      final bs = min(sw, availH) * 0.96;
+
+      // Setup board on first build or size change
+      if (_bs != bs) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          setState(() => _setupBoard(bs));
+        });
+      }
+
+      return Column(
+        children: [
+          _buildHUD(sw),
+          _buildMsgBar(),
+          Expanded(
+            child: Center(
+              child: _bs > 0 ? _buildBoard(bs) : const CircularProgressIndicator(color: Colors.white),
+            ),
+          ),
+          _buildControls(bs),
+        ],
+      );
+    });
+  }
+
+  // ─── HUD ─────────────────────────────────────
+  Widget _buildHUD(double sw) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _playerCard(
+            name: _myPlayer == 1 ? _myName : _oppName,
+            emoji: '⬜',
+            coins: _p1Pocketed,
+            active: _turn == 1,
+            isLeft: true,
+          ),
+          Column(children: [
+            Text(_onlineMode ? '🌐 Online' : '🎮 Local',
+              style: const TextStyle(color: Colors.white70, fontSize: 11)),
+            const SizedBox(height: 4),
+            GestureDetector(
+              onTap: () => setState(() {
+                _screen = _Screen.menu;
+                _onlineMode = false;
+              }),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text('Menu', style: TextStyle(color: Colors.white60, fontSize: 12)),
+              ),
+            ),
+          ]),
+          _playerCard(
+            name: _myPlayer == 2 ? _myName : _oppName,
+            emoji: '⬛',
+            coins: _p2Pocketed,
+            active: _turn == 2,
+            isLeft: false,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _playerCard({
+    required String name,
+    required String emoji,
+    required int coins,
+    required bool active,
+    required bool isLeft,
+  }) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.6),
-        borderRadius: BorderRadius.circular(16),
+        color: active ? const Color(0xFF6B3EF5) : Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: _activePlayer == 1 ? const Color(0xFF7E52FF) : const Color(0xFFFF5252),
-          width: 1.5,
+          color: active ? Colors.white : Colors.transparent,
+          width: 2,
         ),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          // Player 1 (White)
-          Row(
-            children: [
-              Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                  border: Border.all(color: Colors.black45, width: 2),
-                ),
-                child: const Center(child: Text('⚪', style: TextStyle(fontSize: 10))),
-              ),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Text(
-                        'Player 1 (White)',
-                        style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                      ),
-                      if (_activePlayer == 1)
-                        const Text(' ⚡', style: TextStyle(fontSize: 12)),
-                    ],
-                  ),
-                  Text(
-                    '$_p1Score pts • $whiteLeft left',
-                    style: const TextStyle(color: Color(0xFFFFD53D), fontSize: 11, fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-          // Queen indicator
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: queenPocketed ? const Color(0xFF22C55E).withOpacity(0.2) : Colors.red.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: queenPocketed ? const Color(0xFF22C55E) : Colors.red),
-            ),
-            child: Text(
-              queenPocketed ? 'Queen Claimed 👑' : 'Queen Center 👑',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: queenPocketed ? const Color(0xFF22C55E) : const Color(0xFFFF8A80),
-              ),
-            ),
-          ),
-
-          // Player 2 (Black)
-          Row(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Row(
-                    children: [
-                      if (_activePlayer == 2)
-                        const Text('⚡ ', style: TextStyle(fontSize: 12)),
-                      const Text(
-                        'Player 2 (Black)',
-                        style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    '$_p2Score pts • $blackLeft left',
-                    style: const TextStyle(color: Color(0xFFFFD53D), fontSize: 11, fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 8),
-              Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFF1E293B),
-                  border: Border.all(color: Colors.white54, width: 2),
-                ),
-                child: const Center(child: Text('⚫', style: TextStyle(fontSize: 10))),
-              ),
-            ],
-          ),
-        ],
+        children: isLeft
+            ? [Text(emoji), const SizedBox(width: 6), _playerInfo(name, coins)]
+            : [_playerInfo(name, coins), const SizedBox(width: 6), Text(emoji)],
       ),
     );
   }
 
-  Widget _buildSoloScoreboard() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _playerInfo(String name, int coins) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.6),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white24),
-          ),
-          child: Text('Score: $_soloScore pts', style: AppTypography.monoMedium.copyWith(color: const Color(0xFFFFD53D), fontSize: 14)),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.6),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFFFD53D)),
-          ),
-          child: Text('Shots Left: $_shotsRemaining', style: AppTypography.labelSmall.copyWith(color: const Color(0xFFFFD53D))),
-        ),
+        Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+        Text('Pocketed: $coins / $_coinsPerPlayer',
+          style: const TextStyle(color: Colors.white70, fontSize: 10)),
       ],
     );
   }
 
-  Widget _buildStatusPill() {
-    final isP1 = _activePlayer == 1;
-    final pillColor = _mode == CarromGameMode.solo
-        ? const Color(0xFF7E52FF)
-        : (isP1 ? const Color(0xFF7E52FF) : const Color(0xFFFF5252));
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: pillColor.withOpacity(0.18),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: pillColor.withOpacity(0.5)),
-      ),
-      child: Text(
-        _turnFeedback,
-        style: TextStyle(
-          color: Colors.white.withOpacity(0.95),
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
+  // ─── MSG BAR ─────────────────────────────────
+  Widget _buildMsgBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(
+          color: _gameOver
+              ? const Color(0xFF22C55E).withOpacity(0.25)
+              : Colors.white.withOpacity(0.07),
+          borderRadius: BorderRadius.circular(10),
         ),
-        textAlign: TextAlign.center,
-        overflow: TextOverflow.ellipsis,
+        child: Text(
+          _gameOver ? _winner : _msg,
+          style: TextStyle(
+            color: _gameOver ? const Color(0xFF22C55E) : Colors.white,
+            fontWeight: _gameOver ? FontWeight.w900 : FontWeight.normal,
+            fontSize: _gameOver ? 16 : 13,
+          ),
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
     );
   }
 
-  Widget _buildStrikerPositionSlider() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.55),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white24),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.arrow_left_rounded, color: Colors.white70),
-          const Text('Place Striker: ', style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600)),
-          Expanded(
-            child: SliderTheme(
-              data: SliderTheme.of(context).copyWith(
-                activeTrackColor: _activePlayer == 1 ? const Color(0xFF7E52FF) : const Color(0xFFFF5252),
-                inactiveTrackColor: Colors.white24,
-                thumbColor: Colors.white,
-                trackHeight: 4,
-                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-              ),
-              child: Slider(
-                value: _strikerXPercent,
-                min: 0.0,
-                max: 1.0,
-                onChanged: (val) {
-                  setState(() {
-                    _strikerXPercent = val;
-                    _resetStriker();
-                  });
-                },
-              ),
-            ),
-          ),
-          const Icon(Icons.arrow_right_rounded, color: Colors.white70),
-        ],
+  // ─── BOARD ───────────────────────────────────
+  Widget _buildBoard(double bs) {
+    if (_bs == 0) return const SizedBox.shrink();
+
+    final canShoot = _isMyTurn && _settled && !_gameOver;
+
+    return GestureDetector(
+      onPanStart: canShoot ? (d) {
+        setState(() {
+          _aimDragStart = d.localPosition;
+          _aimDragCurrent = d.localPosition;
+        });
+      } : null,
+      onPanUpdate: canShoot ? (d) {
+        setState(() => _aimDragCurrent = d.localPosition);
+      } : null,
+      onPanEnd: canShoot ? (_) => _shoot() : null,
+      child: CustomPaint(
+        size: Size(bs, bs),
+        painter: _CarromBoardPainter(
+          bs: _bs,
+          coins: _coins,
+          striker: _striker,
+          aimStart: _aimDragStart,
+          aimCurrent: _aimDragCurrent,
+          turn: _turn,
+          gameOver: _gameOver,
+          queenCovered: _queenCovered,
+        ),
       ),
     );
   }
 
-  Widget _buildGameOverBanner() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.only(top: 8),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.85),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFFFD53D), width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFFFD53D).withOpacity(0.3),
-            blurRadius: 20,
-          ),
-        ],
-      ),
+  // ─── CONTROLS ────────────────────────────────
+  Widget _buildControls(double bs) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Column(
         children: [
-          Text(
-            _winnerText,
-            style: const TextStyle(
-              color: Color(0xFFFFD53D),
-              fontWeight: FontWeight.w900,
-              fontSize: 18,
+          // Striker position slider
+          if (!_gameOver && _isMyTurn && _settled)
+            Row(
+              children: [
+                const Text('⬅', style: TextStyle(color: Colors.white38, fontSize: 12)),
+                Expanded(
+                  child: Slider(
+                    value: _strikerPct,
+                    min: 0.0, max: 1.0,
+                    activeColor: const Color(0xFF6B3EF5),
+                    inactiveColor: Colors.white24,
+                    onChanged: (v) => setState(() {
+                      _strikerPct = v;
+                      _resetStriker();
+                    }),
+                  ),
+                ),
+                const Text('➡', style: TextStyle(color: Colors.white38, fontSize: 12)),
+              ],
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 12),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.replay_rounded, color: Colors.black),
-            label: const Text('Play Rematch', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFFD53D),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            onPressed: () => setState(_setupBoard),
+
+          // Action row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              if (_gameOver)
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Play Again'),
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6B3EF5)),
+                  onPressed: () => setState(() => _setupBoard(_bs)),
+                )
+              else if (_onlineMode && !_isMyTurn)
+                Text('Waiting for ${_turn == 1 ? _myPlayer == 2 ? _myName : _oppName : _myPlayer == 1 ? _myName : _oppName}…',
+                  style: const TextStyle(color: Colors.white54, fontSize: 13))
+              else
+                Text(_settled ? 'Drag on board to aim & shoot →' : 'Settling…',
+                  style: const TextStyle(color: Colors.white38, fontSize: 12)),
+
+              // Queen status indicator
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _queenCovered
+                      ? const Color(0xFFEF4444).withOpacity(0.25)
+                      : (_queenPocketed ? Colors.amber.withOpacity(0.25) : Colors.white.withOpacity(0.07)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  _queenCovered
+                      ? '👑 Covered'
+                      : (_queenPocketed ? '👑 Cover needed' : '👑 Free'),
+                  style: TextStyle(
+                    color: _queenCovered
+                        ? const Color(0xFFEF4444)
+                        : (_queenPocketed ? Colors.amber : Colors.white38),
+                    fontSize: 12, fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -912,73 +986,234 @@ class _MiniCarromGameState extends State<MiniCarromGame> with SingleTickerProvid
   }
 }
 
-/// Precise Laser Guideline with Cushion Wall-Bounce Reflection
-class _CarromLaserAimPainter extends CustomPainter {
-  final Offset strikerPos;
-  final Offset dragStart;
-  final Offset dragCurrent;
-  final double boardSize;
+// ─────────────────────────────────────────────
+// CARROM BOARD PAINTER
+// ─────────────────────────────────────────────
+class _CarromBoardPainter extends CustomPainter {
+  final double bs;
+  final List<_Coin> coins;
+  final _Coin striker;
+  final Offset? aimStart;
+  final Offset? aimCurrent;
+  final int turn;
+  final bool gameOver;
+  final bool queenCovered;
 
-  _CarromLaserAimPainter({
-    required this.strikerPos,
-    required this.dragStart,
-    required this.dragCurrent,
-    required this.boardSize,
+  _CarromBoardPainter({
+    required this.bs,
+    required this.coins,
+    required this.striker,
+    required this.aimStart,
+    required this.aimCurrent,
+    required this.turn,
+    required this.gameOver,
+    required this.queenCovered,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final diff = dragStart - dragCurrent;
-    final power = diff.distance.clamp(10.0, 160.0);
-    final angle = atan2(diff.dy, diff.dx);
+    final paint = Paint();
 
-    // Primary Aim Trajectory
-    final directLength = power * 1.8;
-    final primaryTarget = strikerPos + Offset(cos(angle) * directLength, sin(angle) * directLength);
+    // ── WOODEN BOARD BACKGROUND ──────────────────
+    final boardRect = Rect.fromLTWH(0, 0, bs, bs);
 
-    // Guideline styling: Glow laser with power color
-    final powerRatio = (power / 160.0).clamp(0.0, 1.0);
-    final aimColor = Color.lerp(const Color(0xFF22C55E), const Color(0xFFFF5252), powerRatio)!;
+    // Wood gradient
+    paint.shader = const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFFD4A86A), Color(0xFFC4934E), Color(0xFFB8853A), Color(0xFFD4A86A)],
+    ).createShader(boardRect);
+    canvas.drawRRect(RRect.fromRectAndRadius(boardRect, Radius.circular(bs * 0.03)), paint);
 
-    final laserPaint = Paint()
-      ..color = aimColor.withOpacity(0.85)
-      ..strokeWidth = 2.4
-      ..style = PaintingStyle.stroke;
+    // Wood grain lines
+    paint
+      ..shader = null
+      ..color = const Color(0xFFB8853A).withOpacity(0.3)
+      ..strokeWidth = 1;
+    for (double y = 0; y < bs; y += bs * 0.04) {
+      canvas.drawLine(Offset(0, y), Offset(bs, y), paint);
+    }
 
-    final dashPaint = Paint()
-      ..color = Colors.white.withOpacity(0.9)
-      ..strokeWidth = 1.5;
+    // ── BOARD BORDER / FRAME ──────────────────────
+    final framePad = bs * 0.04;
+    final frameRect = Rect.fromLTWH(framePad, framePad, bs - framePad * 2, bs - framePad * 2);
+    paint
+      ..style = PaintingStyle.stroke
+      ..color = const Color(0xFF8B5A2B)
+      ..strokeWidth = bs * 0.016;
+    canvas.drawRRect(RRect.fromRectAndRadius(frameRect, Radius.circular(bs * 0.015)), paint);
 
-    // Draw main aim line
-    canvas.drawLine(strikerPos, primaryTarget, laserPaint);
+    // Inner border line
+    final innerPad = framePad + bs * 0.028;
+    final innerRect = Rect.fromLTWH(innerPad, innerPad, bs - innerPad * 2, bs - innerPad * 2);
+    paint.strokeWidth = bs * 0.005;
+    paint.color = const Color(0xFF8B5A2B).withOpacity(0.5);
+    canvas.drawRRect(RRect.fromRectAndRadius(innerRect, Radius.circular(bs * 0.01)), paint);
 
-    // Draw target sight circle
-    canvas.drawCircle(primaryTarget, 5, Paint()..color = aimColor);
-    canvas.drawCircle(primaryTarget, 2, dashPaint);
+    // ── POCKETS ───────────────────────────────────
+    final pocketR = bs * 0.072;
+    final pocketMargin = bs * 0.065;
+    final pocketPositions = [
+      Offset(pocketMargin, pocketMargin),
+      Offset(bs - pocketMargin, pocketMargin),
+      Offset(pocketMargin, bs - pocketMargin),
+      Offset(bs - pocketMargin, bs - pocketMargin),
+    ];
 
-    // Compute wall reflection if aiming toward edges
-    const margin = 20.0;
-    if (primaryTarget.dx < margin || primaryTarget.dx > boardSize - margin ||
-        primaryTarget.dy < margin || primaryTarget.dy > boardSize - margin) {
-      // Wall bounce ray
-      double reflectAngle = angle;
-      if (primaryTarget.dx < margin || primaryTarget.dx > boardSize - margin) {
-        reflectAngle = pi - angle;
-      } else {
-        reflectAngle = -angle;
+    for (final pos in pocketPositions) {
+      // Pocket shadow
+      paint
+        ..style = PaintingStyle.fill
+        ..color = Colors.black.withOpacity(0.6);
+      canvas.drawCircle(pos, pocketR, paint);
+      // Pocket inner dark circle
+      paint.color = const Color(0xFF1A0A00);
+      canvas.drawCircle(pos, pocketR * 0.78, paint);
+    }
+
+    // ── CENTER CIRCLE ─────────────────────────────
+    final center = Offset(bs / 2, bs / 2);
+    paint
+      ..style = PaintingStyle.stroke
+      ..color = const Color(0xFF8B5A2B).withOpacity(0.7)
+      ..strokeWidth = bs * 0.007;
+    canvas.drawCircle(center, bs * 0.19, paint);
+    canvas.drawCircle(center, bs * 0.045, paint);
+
+    // ── BASELINE LINES ────────────────────────────
+    final baselineY1 = bs * 0.84; // P1 baseline (bottom)
+    final baselineY2 = bs * 0.16; // P2 baseline (top)
+    final baselineX1 = bs * 0.22;
+    final baselineX2 = bs * 0.78;
+
+    paint
+      ..color = const Color(0xFF8B5A2B).withOpacity(0.5)
+      ..strokeWidth = bs * 0.005;
+    // P1 baseline
+    canvas.drawLine(Offset(baselineX1, baselineY1), Offset(baselineX2, baselineY1), paint);
+    // P2 baseline
+    canvas.drawLine(Offset(baselineX1, baselineY2), Offset(baselineX2, baselineY2), paint);
+
+    // ── AIM GUIDE (drag arrow) ────────────────────
+    if (aimStart != null && aimCurrent != null) {
+      final drag = aimStart! - aimCurrent!;
+      final dragLen = drag.distance;
+      if (dragLen > 5) {
+        final dir = drag / dragLen;
+        final lineEnd = striker.pos + dir * (dragLen.clamp(0, bs * 0.4));
+
+        // Dotted aim line
+        final dashPaint = Paint()
+          ..color = Colors.white.withOpacity(0.6)
+          ..strokeWidth = 1.5
+          ..style = PaintingStyle.stroke;
+        const dashLen = 8.0;
+        const gapLen  = 5.0;
+        double traveled = 0;
+        final total = (lineEnd - striker.pos).distance;
+        while (traveled < total) {
+          final segStart = striker.pos + dir * traveled;
+          final segEnd = striker.pos + dir * (traveled + dashLen).clamp(0, total);
+          canvas.drawLine(segStart, segEnd, dashPaint);
+          traveled += dashLen + gapLen;
+        }
+
+        // Power indicator dot at drag point
+        paint
+          ..style = PaintingStyle.fill
+          ..color = Colors.white.withOpacity(0.4);
+        canvas.drawCircle(lineEnd, 4, paint);
       }
+    }
 
-      final bounceTarget = primaryTarget + Offset(cos(reflectAngle) * 50, sin(reflectAngle) * 50);
-      final bouncePaint = Paint()
-        ..color = aimColor.withOpacity(0.4)
-        ..strokeWidth = 1.6
-        ..style = PaintingStyle.stroke;
+    // ── COINS ─────────────────────────────────────
+    for (final coin in coins) {
+      if (coin.pocketed) continue;
+      _drawCoin(canvas, coin, bs);
+    }
 
-      canvas.drawLine(primaryTarget, bounceTarget, bouncePaint);
+    // ── STRIKER ───────────────────────────────────
+    _drawStriker(canvas, striker, turn, bs);
+  }
+
+  void _drawCoin(Canvas canvas, _Coin coin, double bs) {
+    final paint = Paint();
+
+    if (coin.isQueen) {
+      // Red queen with gold border
+      paint
+        ..style = PaintingStyle.fill
+        ..color = const Color(0xFFDC2626);
+      canvas.drawCircle(coin.pos, coin.r, paint);
+      paint
+        ..style = PaintingStyle.stroke
+        ..color = const Color(0xFFFFD700)
+        ..strokeWidth = coin.r * 0.25;
+      canvas.drawCircle(coin.pos, coin.r, paint);
+      // Crown mark
+      final tp = TextPainter(
+        text: const TextSpan(text: 'Q', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w900)),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      tp.paint(canvas, coin.pos - Offset(tp.width / 2, tp.height / 2));
+    } else {
+      // Shadow
+      paint
+        ..style = PaintingStyle.fill
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3)
+        ..color = Colors.black.withOpacity(0.3);
+      canvas.drawCircle(coin.pos + const Offset(1.5, 2), coin.r, paint);
+      paint.maskFilter = null;
+
+      // Fill
+      paint.color = coin.isWhite ? const Color(0xFFF5F0E8) : const Color(0xFF1C1410);
+      canvas.drawCircle(coin.pos, coin.r, paint);
+
+      // Rim
+      paint
+        ..style = PaintingStyle.stroke
+        ..color = coin.isWhite ? const Color(0xFFD4C5A9) : const Color(0xFF3D2B1A)
+        ..strokeWidth = coin.r * 0.18;
+      canvas.drawCircle(coin.pos, coin.r * 0.85, paint);
+
+      // Highlight
+      paint
+        ..style = PaintingStyle.fill
+        ..color = Colors.white.withOpacity(0.35);
+      canvas.drawCircle(coin.pos - Offset(coin.r * 0.28, coin.r * 0.3), coin.r * 0.3, paint);
     }
   }
 
+  void _drawStriker(Canvas canvas, _Coin striker, int turn, double bs) {
+    final paint = Paint();
+
+    // Glow
+    paint
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8)
+      ..color = (turn == 1 ? const Color(0xFF6B3EF5) : const Color(0xFFEF4444)).withOpacity(0.6)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(striker.pos, striker.r * 1.3, paint);
+    paint.maskFilter = null;
+
+    // Fill
+    paint.shader = RadialGradient(
+      center: const Alignment(-0.3, -0.4),
+      radius: 0.8,
+      colors: turn == 1
+          ? [const Color(0xFF9B6FFF), const Color(0xFF5B2EE5)]
+          : [const Color(0xFFFF7070), const Color(0xFFCC2020)],
+    ).createShader(Rect.fromCircle(center: striker.pos, radius: striker.r));
+    canvas.drawCircle(striker.pos, striker.r, paint);
+    paint.shader = null;
+
+    // Rim
+    paint
+      ..style = PaintingStyle.stroke
+      ..color = Colors.white.withOpacity(0.5)
+      ..strokeWidth = striker.r * 0.12;
+    canvas.drawCircle(striker.pos, striker.r * 0.88, paint);
+  }
+
   @override
-  bool shouldRepaint(covariant _CarromLaserAimPainter old) =>
-      old.dragCurrent != dragCurrent || old.dragStart != dragStart || old.boardSize != boardSize;
+  bool shouldRepaint(covariant _CarromBoardPainter old) => true;
 }
