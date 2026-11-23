@@ -98,6 +98,11 @@ class _MiniCarromGameState extends State<MiniCarromGame>
   bool _gameOver = false;
   String _winner = '';
 
+  // Shot outcome tracking (persists during the entire shot until all pieces stop)
+  final List<_Coin> _coinsPocketedThisShot = [];
+  bool _strikerPocketedThisShot = false;
+  bool _queenPocketedThisShot = false;
+
   // Striker drag / aim
   double _strikerPct = 0.5; // 0..1 horizontal on baseline
   Offset? _aimDragStart;
@@ -146,8 +151,8 @@ class _MiniCarromGameState extends State<MiniCarromGame>
     final inner = _bs * 0.085;
     final outer = _bs * 0.165;
 
-    // Center Queen
-    _coins.add(_Coin(pos: c, r: r, isWhite: true, isQueen: true));
+    // Center Queen (Red)
+    _coins.add(_Coin(pos: c, r: r, isWhite: false, isQueen: true));
 
     // Inner ring: 6 alternating
     for (int i = 0; i < 6; i++) {
@@ -176,6 +181,9 @@ class _MiniCarromGameState extends State<MiniCarromGame>
     _queenPocketed = false;
     _queenCovered  = false;
     _pendingQueenCover = false;
+    _coinsPocketedThisShot.clear();
+    _strikerPocketedThisShot = false;
+    _queenPocketedThisShot = false;
     _turn = 1;
     _gameOver = false;
     _winner = '';
@@ -212,12 +220,6 @@ class _MiniCarromGameState extends State<MiniCarromGame>
     if (!mounted || _gameOver || _settled) return;
 
     bool anyMoving = false;
-    bool coinPocketed = false;
-    bool strikerPocketed = false;
-    bool queenJustPocketed = false;
-    bool p1CoinPocketed = false;
-    bool p2CoinPocketed = false;
-
     final pockets = _pocketPositions();
     final allPieces = [_striker, ..._coins.where((c) => !c.pocketed)];
     final pr = _bs * 0.072; // pocket radius
@@ -254,15 +256,14 @@ class _MiniCarromGameState extends State<MiniCarromGame>
             p.pos = const Offset(-999, -999);
 
             if (p == _striker) {
-              strikerPocketed = true;
+              _strikerPocketedThisShot = true;
             } else if (p.isQueen) {
-              queenJustPocketed = true;
-            } else if (p.isWhite) {
-              p1CoinPocketed = true;
+              _queenPocketedThisShot = true;
             } else {
-              p2CoinPocketed = true;
+              if (!_coinsPocketedThisShot.contains(p)) {
+                _coinsPocketedThisShot.add(p);
+              }
             }
-            coinPocketed = true;
           }
         }
       } else {
@@ -293,116 +294,199 @@ class _MiniCarromGameState extends State<MiniCarromGame>
       }
     }
 
-    // Handle queen pocketing
-    if (queenJustPocketed) {
-      _pendingQueenCover = true;
-    }
-
-    // After shot settles
+    // After all pieces settle to complete stop
     if (_shooting && !anyMoving) {
       _shooting = false;
       _settled = true;
-      _onShotSettled(
-        coinPocketed: coinPocketed,
-        strikerPocketed: strikerPocketed,
-        p1CoinPocketed: p1CoinPocketed,
-        p2CoinPocketed: p2CoinPocketed,
-        queenJustPocketed: queenJustPocketed,
-      );
+      _onShotSettled();
     }
 
     if (mounted) setState(() {});
   }
 
-  void _onShotSettled({
-    required bool coinPocketed,
-    required bool strikerPocketed,
-    required bool p1CoinPocketed,
-    required bool p2CoinPocketed,
-    required bool queenJustPocketed,
-  }) {
-    bool extraTurn = false;
+  // ─── CARROM POOL PLAY STORE RULES ─────────────
+  void _updatePocketedCounts() {
+    _p1Pocketed = _coins.where((c) => !c.isQueen && c.isWhite && c.pocketed).length;
+    _p2Pocketed = _coins.where((c) => !c.isQueen && !c.isWhite && c.pocketed).length;
+  }
 
-    if (strikerPocketed) {
-      // Foul — lose turn, opponent gets +1 coin back if any pocketed
-      _msg = '⚠️ Foul! Striker pocketed — turn changes';
-      _pendingQueenCover = false;
-      // If queen was also pocketed on foul shot, return it
-      if (queenJustPocketed) {
-        _returnQueen();
-      }
-      _switchTurn();
-      return;
+  void _returnCoinToBoard(_Coin coin) {
+    final c = Offset(_bs / 2, _bs / 2);
+    final r = coin.r;
+    Offset target = c;
+    double radiusStep = r * 2.2;
+    int step = 0;
+    while (_coins.any((other) => other != coin && !other.pocketed && (other.pos - target).distance < r * 2.0)) {
+      step++;
+      final angle = step * (pi / 3);
+      final dist = radiusStep * (1 + (step ~/ 6) * 0.8);
+      target = c + Offset(cos(angle) * dist, sin(angle) * dist);
     }
+    coin.pocketed = false;
+    coin.pos = target;
+    coin.vel = Offset.zero;
+  }
 
-    // Count pocketed coins for current player
-    if (_turn == 1 && p1CoinPocketed) {
-      _p1Pocketed++;
-      extraTurn = true;
-      _msg = '✅ P1 pocketed! +1 — shoot again!';
-    } else if (_turn == 2 && p2CoinPocketed) {
-      _p2Pocketed++;
-      extraTurn = true;
-      _msg = '✅ P2 pocketed! +1 — shoot again!';
-    } else if (coinPocketed && !strikerPocketed) {
-      // Pocketed opponent's coin — foul
-      _msg = '⚠️ Wrong coin! Turn changes';
-    } else if (!coinPocketed) {
-      _msg = 'No pocket — turn changes';
-    }
-
-    // Queen cover rule
-    if (queenJustPocketed) {
-      if (extraTurn) {
-        // Queen is covered only if same player pockets one of their own coins AFTER queen
-        // in this turn they already did — count queen
-        _queenPocketed = true;
-        _queenCovered  = true;
-        _msg += ' 👑 Queen covered!';
-      } else {
-        // Queen not covered — return it
-        _returnQueen();
-        _msg += ' 👑 Queen returned (not covered)';
-      }
-    } else if (_pendingQueenCover && extraTurn) {
-      _queenCovered = true;
-      _pendingQueenCover = false;
-      _msg += ' 👑 Queen covered!';
-    } else {
-      _pendingQueenCover = false;
-    }
-
-    // Win check: player pockets all 9 of their own coins
-    if (_p1Pocketed >= _coinsPerPlayer) {
-      _endGame('Player 1 Wins! 🎉');
-      return;
-    }
-    if (_p2Pocketed >= _coinsPerPlayer) {
-      _endGame('Player 2 Wins! 🎉');
-      return;
-    }
-
-    if (!extraTurn) {
-      _switchTurn();
-    } else {
-      _resetStriker();
-      if (mounted) setState(() {});
+  void _returnOnePocketedCoin(bool isP1) {
+    final available = _coins.where(
+      (c) => !c.isQueen && (isP1 ? c.isWhite : !c.isWhite) && c.pocketed,
+    ).toList();
+    if (available.isNotEmpty) {
+      _returnCoinToBoard(available.last);
     }
   }
 
   void _returnQueen() {
-    final c = Offset(_bs / 2, _bs / 2);
     final qCoin = _coins.firstWhere((c) => c.isQueen, orElse: () => _coins.first);
-    qCoin.pocketed = false;
-    qCoin.pos = c;
-    qCoin.vel = Offset.zero;
+    if (qCoin.isQueen && qCoin.pocketed) {
+      _returnCoinToBoard(qCoin);
+    }
+    _queenPocketed = false;
+    _queenCovered = false;
     _pendingQueenCover = false;
   }
 
+  String get _p1DisplayName => _myPlayer == 1 ? _myName : _oppName;
+  String get _p2DisplayName => _myPlayer == 2 ? _myName : _oppName;
+  String get _currentShooterName => _turn == 1 ? _p1DisplayName : _p2DisplayName;
+
+  void _onShotSettled() {
+    final isP1 = (_turn == 1);
+    final shooterName = _currentShooterName;
+
+    // Coins pocketed this turn for current shooter (P1 = White, P2 = Black)
+    final myCoins = _coinsPocketedThisShot.where((c) => !c.isQueen && (isP1 ? c.isWhite : !c.isWhite)).toList();
+    final oppCoins = _coinsPocketedThisShot.where((c) => !c.isQueen && (isP1 ? !c.isWhite : c.isWhite)).toList();
+    final bool pottedQueen = _queenPocketedThisShot;
+    final bool scratched = _strikerPocketedThisShot;
+
+    _updatePocketedCounts();
+
+    // ───────────────────────────────────────────────
+    // RULE 1: FOUL (Striker into pocket / Scratch)
+    // ───────────────────────────────────────────────
+    if (scratched) {
+      // 1. Any own coins pocketed on this foul shot are returned to board
+      for (final coin in myCoins) {
+        _returnCoinToBoard(coin);
+      }
+      // 2. Queen returned if potted on foul shot
+      if (pottedQueen) {
+        _returnQueen();
+      }
+      // 3. Pending Queen cover cancelled & Queen returned
+      if (_pendingQueenCover) {
+        _returnQueen();
+      }
+      // 4. Penalty: return 1 previously pocketed coin
+      final hasPreviousPocketed = _coins.any((c) => !c.isQueen && (isP1 ? c.isWhite : !c.isWhite) && c.pocketed);
+      if (hasPreviousPocketed) {
+        _returnOnePocketedCoin(isP1);
+        _msg = '⚠️ Foul! Striker in pocket — 1 penalty coin returned.';
+      } else {
+        _msg = '⚠️ Foul! Striker in pocket — turn changes.';
+      }
+
+      _updatePocketedCounts();
+      _switchTurn();
+      return;
+    }
+
+    // ───────────────────────────────────────────────
+    // RULE 2: QUEEN POCKETING & COVERING
+    // ───────────────────────────────────────────────
+    bool extraTurn = false;
+
+    if (pottedQueen) {
+      _queenPocketed = true;
+      if (myCoins.isNotEmpty) {
+        // Covered on same shot!
+        _queenCovered = true;
+        _pendingQueenCover = false;
+        extraTurn = true;
+        _msg = '👑 $shooterName potted Queen & covered on same shot! Shoot again!';
+      } else {
+        // Must cover on next shot
+        _pendingQueenCover = true;
+        extraTurn = true; // Gets another chance to cover
+        _msg = '👑 $shooterName potted Queen! Pocket your coin next to cover it!';
+      }
+    } else if (_pendingQueenCover) {
+      if (myCoins.isNotEmpty) {
+        // Successfully covered!
+        _queenCovered = true;
+        _pendingQueenCover = false;
+        extraTurn = true;
+        _msg = '👑 Queen successfully covered! Shoot again!';
+      } else {
+        // Failed to cover
+        _returnQueen();
+        extraTurn = false;
+        _msg = '❌ Failed to cover Queen — Queen returned to center.';
+      }
+    } else {
+      // ───────────────────────────────────────────────
+      // RULE 3: REGULAR SHOT
+      // ───────────────────────────────────────────────
+      if (myCoins.isNotEmpty) {
+        // Potted own coin -> PLAYER GETS ANOTHER CHANCE!
+        extraTurn = true;
+        _msg = '✅ $shooterName potted ${myCoins.length} coin${myCoins.length > 1 ? "s" : ""}! Shoot again!';
+      } else if (oppCoins.isNotEmpty) {
+        // Only opponent coin potted -> opponent keeps credit, turn shifts
+        extraTurn = false;
+        _msg = '⚠️ Opponent coin potted — turn changes.';
+      } else {
+        // No coin potted -> turn shifts
+        extraTurn = false;
+        _msg = 'No coin potted — turn changes.';
+      }
+    }
+
+    _updatePocketedCounts();
+
+    // ───────────────────────────────────────────────
+    // RULE 4: WIN CHECK
+    // ───────────────────────────────────────────────
+    final queenStillOnBoard = _coins.any((c) => c.isQueen && !c.pocketed);
+
+    if (_p1Pocketed >= _coinsPerPlayer) {
+      if (queenStillOnBoard) {
+        _returnOnePocketedCoin(true);
+        _updatePocketedCounts();
+        _msg = '⚠️ Must pocket Queen before your last coin!';
+        _switchTurn();
+        return;
+      }
+      _endGame('$_p1DisplayName Wins! 🎉');
+      return;
+    }
+
+    if (_p2Pocketed >= _coinsPerPlayer) {
+      if (queenStillOnBoard) {
+        _returnOnePocketedCoin(false);
+        _updatePocketedCounts();
+        _msg = '⚠️ Must pocket Queen before your last coin!';
+        _switchTurn();
+        return;
+      }
+      _endGame('$_p2DisplayName Wins! 🎉');
+      return;
+    }
+
+    // ───────────────────────────────────────────────
+    // RULE 5: TURN SWITCH OR CONTINUE
+    // ───────────────────────────────────────────────
+    if (extraTurn) {
+      _resetStriker();
+      if (mounted) setState(() {});
+    } else {
+      _switchTurn();
+    }
+  }
+
   void _switchTurn() {
-    // In online mode, only switch if it's currently my turn
-    _turn = _turn == 1 ? 2 : 1;
-    _msg = _turn == 1 ? 'P1\'s turn — aim!' : 'P2\'s turn — aim!';
+    _turn = (_turn == 1) ? 2 : 1;
     _resetStriker();
     if (mounted) setState(() {});
   }
@@ -428,6 +512,12 @@ class _MiniCarromGameState extends State<MiniCarromGame>
 
     final dir = drag / drag.distance;
     final speed = power * 0.28;
+
+    // Reset shot tracking for this new shot
+    _coinsPocketedThisShot.clear();
+    _strikerPocketedThisShot = false;
+    _queenPocketedThisShot = false;
+
     _striker.vel = dir * speed;
     _shooting = true;
     _settled = false;
@@ -777,8 +867,8 @@ class _MiniCarromGameState extends State<MiniCarromGame>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _playerCard(
-            name: _myPlayer == 1 ? _myName : _oppName,
-            emoji: '⬜',
+            name: _p1DisplayName,
+            emoji: '⚪',
             coins: _p1Pocketed,
             active: _turn == 1,
             isLeft: true,
@@ -803,8 +893,8 @@ class _MiniCarromGameState extends State<MiniCarromGame>
             ),
           ]),
           _playerCard(
-            name: _myPlayer == 2 ? _myName : _oppName,
-            emoji: '⬛',
+            name: _p2DisplayName,
+            emoji: '⚫',
             coins: _p2Pocketed,
             active: _turn == 2,
             isLeft: false,
